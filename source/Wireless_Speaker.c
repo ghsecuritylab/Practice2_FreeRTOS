@@ -70,8 +70,8 @@
 /* IP address configuration. */
 #define configIP_ADDR0 192
 #define configIP_ADDR1 168
-#define configIP_ADDR2 0
-#define configIP_ADDR3 102
+#define configIP_ADDR2 1
+#define configIP_ADDR3 66
 
 /* Netmask configuration. */
 #define configNET_MASK0 255
@@ -82,11 +82,12 @@
 /* Gateway address configuration. */
 #define configGW_ADDR0 192
 #define configGW_ADDR1 168
-#define configGW_ADDR2 0
-#define configGW_ADDR3 100
+#define configGW_ADDR2 1
+#define configGW_ADDR3 254
 
 /* MAC address configuration. */
 #define configMAC_ADDR {0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
+//#define configMAC_ADDR {0x48, 0xD2, 0x24, 0x05, 0x7A, 0x7C}
 
 /* Address of PHY interface. */
 #define EXAMPLE_PHY_ADDRESS BOARD_ENET0_PHY_ADDRESS
@@ -100,6 +101,7 @@
 
 /*! @brief Priority of the temporary lwIP initialization thread. */
 #define INIT_THREAD_PRIO DEFAULT_THREAD_PRIO
+
 
 /*******************************************************************************
 * Prototypes
@@ -120,7 +122,8 @@ static void stack_init(void *arg)
 {
     static struct netif fsl_netif0;
     ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
-    ethernetif_config_t fsl_enet_config0 = {
+    ethernetif_config_t fsl_enet_config0 =
+    {
         .phyAddress = EXAMPLE_PHY_ADDRESS,
         .clockName = EXAMPLE_CLOCK_NAME,
         .macAddress = configMAC_ADDR,
@@ -152,9 +155,7 @@ static void stack_init(void *arg)
 
     //tcpecho_init();
     udpecho_init();
-
-    vTaskStartScheduler();
-    //vTaskDelete(NULL);
+    //vTaskStartScheduler();
 }
 
 /*!
@@ -163,19 +164,26 @@ static void stack_init(void *arg)
 int main(void)
 {
     SYSMPU_Type *base = SYSMPU;
+  	/* Init board hardware. */
     BOARD_InitPins();
     BOARD_BootClockRUN();
+    BOARD_InitBootPeripherals();
+  	/* Init FSL debug console. */
     BOARD_InitDebugConsole();
     /* Disable SYSMPU. */
     base->CESR &= ~SYSMPU_CESR_VLD_MASK;
+#if 0
+	xTaskCreate(stack_init, "main", INIT_THREAD_STACKSIZE, NULL, INIT_THREAD_PRIO, NULL);
 
     /* Initialize lwIP from thread */
     if(sys_thread_new("main", stack_init, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
         LWIP_ASSERT("main(): Task creation failed.", 0);
+#endif
+    stack_init(NULL);
 
-
-
-    /* Will not get here unless a task calls vTaskEndScheduler ()*/
+    for(;;)
+    {
+    }
     return 0;
 }
 #endif

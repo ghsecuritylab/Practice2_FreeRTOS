@@ -39,8 +39,12 @@
 #include "lwip/api.h"
 #include "lwip/sys.h"
 
+#include "MK64F12.h"
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
+
+SemaphoreHandle_t g_semaphore;
 
 static void
 server_thread(void *arg)
@@ -49,7 +53,6 @@ server_thread(void *arg)
 	struct netbuf *buf;
 
 	char *msg;
-
 	uint16_t len;
 
 	LWIP_UNUSED_ARG(arg);
@@ -62,7 +65,6 @@ server_thread(void *arg)
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&msg, &len);
 		netbuf_delete(buf);
-
 	}
 }
 
@@ -82,8 +84,8 @@ client_thread(void *arg)
 	buf = netbuf_new();
 	netbuf_ref(buf,msg,10);
 
-	IP4_ADDR(&dst_ip, 169, 254, 122, 230);
-
+	IP4_ADDR(&dst_ip, 192, 168, 1, 65);
+	xSemaphoreTake(g_semaphore, portMAX_DELAY);
 	while (1)
 	{
 		netconn_sendto(conn, buf, &dst_ip, 50000);
@@ -94,8 +96,12 @@ client_thread(void *arg)
 void
 udpecho_init(void)
 {
-	sys_thread_new("client", client_thread, NULL, 300, 1);
-	sys_thread_new("server", server_thread, NULL, 300, 2);
+	g_semaphore = xSemaphoreCreateBinary();
+
+	xTaskCreate(client_thread, "client", (4*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xTaskCreate(server_thread, "server", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xSemaphoreGive(g_semaphore);
+	vTaskStartScheduler();
 }
 
 #endif /* LWIP_NETCONN */
