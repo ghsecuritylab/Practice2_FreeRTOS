@@ -52,14 +52,15 @@ server_thread(void *arg)
 	struct netconn *conn;
 	struct netbuf *buf;
 
-	char *msg;
+	uint32_t *msg;
 	uint16_t len;
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
-	netconn_bind(conn, IP_ADDR_ANY, 50000);
+	netconn_bind(conn, IP_ADDR_ANY, 50500);
 	//LWIP_ERROR("udpecho: invalid conn", (conn != NULL), return;);
 
+	xSemaphoreTake(g_semaphore, portMAX_DELAY);
 	while (1)
 	{
 		netconn_recv(conn, &buf);
@@ -85,7 +86,6 @@ client_thread(void *arg)
 	netbuf_ref(buf,msg,10);
 
 	IP4_ADDR(&dst_ip, 192, 168, 1, 65);
-	xSemaphoreTake(g_semaphore, portMAX_DELAY);
 	while (1)
 	{
 		netconn_sendto(conn, buf, &dst_ip, 50000);

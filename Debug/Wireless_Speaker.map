@@ -3154,9 +3154,9 @@ END GROUP
                 0x0000da5e                sys_arch_unprotect
  *fill*         0x0000da8a        0x2 ff
  .text.server_thread
-                0x0000da8c       0x4c ./lwip/contrib/apps/udpecho/udpecho.o
+                0x0000da8c       0x60 ./lwip/contrib/apps/udpecho/udpecho.o
  .text.client_thread
-                0x0000dad8       0x64 ./lwip/contrib/apps/udpecho/udpecho.o
+                0x0000daec       0x50 ./lwip/contrib/apps/udpecho/udpecho.o
  .text.udpecho_init
                 0x0000db3c       0x70 ./lwip/contrib/apps/udpecho/udpecho.o
                 0x0000db3c                udpecho_init
@@ -4370,7 +4370,7 @@ END GROUP
                 0x0001703c                _image_size = (_image_end - _image_start)
 OUTPUT(Wireless_Speaker.axf elf32-littlearm)
 
-.debug_info     0x00000000    0x2ab87
+.debug_info     0x00000000    0x2ab91
  .debug_info    0x00000000      0x376 ./utilities/fsl_debug_console.o
  .debug_info    0x00000376      0x81a ./utilities/fsl_io.o
  .debug_info    0x00000b90      0x34a ./utilities/fsl_log.o
@@ -4404,26 +4404,26 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_info    0x00018da6      0xda5 ./lwip/src/api/tcpip.o
  .debug_info    0x00019b4b     0x1f47 ./lwip/port/ethernetif.o
  .debug_info    0x0001ba92      0xb5d ./lwip/port/sys_arch.o
- .debug_info    0x0001c5ef      0x6fa ./lwip/contrib/apps/udpecho/udpecho.o
- .debug_info    0x0001cce9      0x998 ./freertos/source/event_groups.o
- .debug_info    0x0001d681      0x2c7 ./freertos/source/list.o
- .debug_info    0x0001d948     0x1416 ./freertos/source/queue.o
- .debug_info    0x0001ed5e     0x2055 ./freertos/source/tasks.o
- .debug_info    0x00020db3      0xd46 ./freertos/source/timers.o
- .debug_info    0x00021af9       0xe9 ./freertos/portable/fsl_tickless_systick.o
- .debug_info    0x00021be2      0x118 ./freertos/portable/heap_3.o
- .debug_info    0x00021cfa      0x507 ./freertos/portable/port.o
- .debug_info    0x00022201     0x1e85 ./drivers/fsl_clock.o
- .debug_info    0x00024086     0x239e ./drivers/fsl_enet.o
- .debug_info    0x00026424     0x19d1 ./drivers/fsl_uart.o
- .debug_info    0x00027df5      0x610 ./board/board.o
- .debug_info    0x00028405      0xa97 ./board/clock_config.o
- .debug_info    0x00028e9c      0xe8f ./board/fsl_phy.o
- .debug_info    0x00029d2b       0x37 ./board/peripherals.o
- .debug_info    0x00029d62      0x803 ./board/pin_mux.o
- .debug_info    0x0002a565      0x622 ./CMSIS/system_MK64F12.o
+ .debug_info    0x0001c5ef      0x704 ./lwip/contrib/apps/udpecho/udpecho.o
+ .debug_info    0x0001ccf3      0x998 ./freertos/source/event_groups.o
+ .debug_info    0x0001d68b      0x2c7 ./freertos/source/list.o
+ .debug_info    0x0001d952     0x1416 ./freertos/source/queue.o
+ .debug_info    0x0001ed68     0x2055 ./freertos/source/tasks.o
+ .debug_info    0x00020dbd      0xd46 ./freertos/source/timers.o
+ .debug_info    0x00021b03       0xe9 ./freertos/portable/fsl_tickless_systick.o
+ .debug_info    0x00021bec      0x118 ./freertos/portable/heap_3.o
+ .debug_info    0x00021d04      0x507 ./freertos/portable/port.o
+ .debug_info    0x0002220b     0x1e85 ./drivers/fsl_clock.o
+ .debug_info    0x00024090     0x239e ./drivers/fsl_enet.o
+ .debug_info    0x0002642e     0x19d1 ./drivers/fsl_uart.o
+ .debug_info    0x00027dff      0x610 ./board/board.o
+ .debug_info    0x0002840f      0xa97 ./board/clock_config.o
+ .debug_info    0x00028ea6      0xe8f ./board/fsl_phy.o
+ .debug_info    0x00029d35       0x37 ./board/peripherals.o
+ .debug_info    0x00029d6c      0x803 ./board/pin_mux.o
+ .debug_info    0x0002a56f      0x622 ./CMSIS/system_MK64F12.o
 
-.debug_abbrev   0x00000000     0x633e
+.debug_abbrev   0x00000000     0x6328
  .debug_abbrev  0x00000000      0x174 ./utilities/fsl_debug_console.o
  .debug_abbrev  0x00000174      0x21b ./utilities/fsl_io.o
  .debug_abbrev  0x0000038f      0x17b ./utilities/fsl_log.o
@@ -4457,24 +4457,24 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_abbrev  0x00003a69      0x260 ./lwip/src/api/tcpip.o
  .debug_abbrev  0x00003cc9      0x2ff ./lwip/port/ethernetif.o
  .debug_abbrev  0x00003fc8      0x2b3 ./lwip/port/sys_arch.o
- .debug_abbrev  0x0000427b      0x199 ./lwip/contrib/apps/udpecho/udpecho.o
- .debug_abbrev  0x00004414      0x21a ./freertos/source/event_groups.o
- .debug_abbrev  0x0000462e      0x10f ./freertos/source/list.o
- .debug_abbrev  0x0000473d      0x250 ./freertos/source/queue.o
- .debug_abbrev  0x0000498d      0x304 ./freertos/source/tasks.o
- .debug_abbrev  0x00004c91      0x216 ./freertos/source/timers.o
- .debug_abbrev  0x00004ea7       0x8f ./freertos/portable/fsl_tickless_systick.o
- .debug_abbrev  0x00004f36       0xdf ./freertos/portable/heap_3.o
- .debug_abbrev  0x00005015      0x249 ./freertos/portable/port.o
- .debug_abbrev  0x0000525e      0x302 ./drivers/fsl_clock.o
- .debug_abbrev  0x00005560      0x27f ./drivers/fsl_enet.o
- .debug_abbrev  0x000057df      0x2fc ./drivers/fsl_uart.o
- .debug_abbrev  0x00005adb      0x139 ./board/board.o
- .debug_abbrev  0x00005c14      0x1ed ./board/clock_config.o
- .debug_abbrev  0x00005e01      0x1e4 ./board/fsl_phy.o
- .debug_abbrev  0x00005fe5       0x2c ./board/peripherals.o
- .debug_abbrev  0x00006011      0x1f4 ./board/pin_mux.o
- .debug_abbrev  0x00006205      0x139 ./CMSIS/system_MK64F12.o
+ .debug_abbrev  0x0000427b      0x183 ./lwip/contrib/apps/udpecho/udpecho.o
+ .debug_abbrev  0x000043fe      0x21a ./freertos/source/event_groups.o
+ .debug_abbrev  0x00004618      0x10f ./freertos/source/list.o
+ .debug_abbrev  0x00004727      0x250 ./freertos/source/queue.o
+ .debug_abbrev  0x00004977      0x304 ./freertos/source/tasks.o
+ .debug_abbrev  0x00004c7b      0x216 ./freertos/source/timers.o
+ .debug_abbrev  0x00004e91       0x8f ./freertos/portable/fsl_tickless_systick.o
+ .debug_abbrev  0x00004f20       0xdf ./freertos/portable/heap_3.o
+ .debug_abbrev  0x00004fff      0x249 ./freertos/portable/port.o
+ .debug_abbrev  0x00005248      0x302 ./drivers/fsl_clock.o
+ .debug_abbrev  0x0000554a      0x27f ./drivers/fsl_enet.o
+ .debug_abbrev  0x000057c9      0x2fc ./drivers/fsl_uart.o
+ .debug_abbrev  0x00005ac5      0x139 ./board/board.o
+ .debug_abbrev  0x00005bfe      0x1ed ./board/clock_config.o
+ .debug_abbrev  0x00005deb      0x1e4 ./board/fsl_phy.o
+ .debug_abbrev  0x00005fcf       0x2c ./board/peripherals.o
+ .debug_abbrev  0x00005ffb      0x1f4 ./board/pin_mux.o
+ .debug_abbrev  0x000061ef      0x139 ./CMSIS/system_MK64F12.o
 
 .debug_aranges  0x00000000     0x1d88
  .debug_aranges

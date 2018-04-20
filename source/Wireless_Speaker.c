@@ -87,7 +87,6 @@
 
 /* MAC address configuration. */
 #define configMAC_ADDR {0x02, 0x12, 0x13, 0x10, 0x15, 0x11}
-//#define configMAC_ADDR {0x48, 0xD2, 0x24, 0x05, 0x7A, 0x7C}
 
 /* Address of PHY interface. */
 #define EXAMPLE_PHY_ADDRESS BOARD_ENET0_PHY_ADDRESS
@@ -155,7 +154,6 @@ static void stack_init(void *arg)
 
     //tcpecho_init();
     udpecho_init();
-    //vTaskStartScheduler();
 }
 
 /*!
