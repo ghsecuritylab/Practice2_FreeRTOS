@@ -42,7 +42,8 @@ lwip/contrib/apps/udpecho/udpecho.o lwip/contrib/apps/udpecho/udpecho.d: \
  C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/def.h \
  C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/sys.h \
  C:\Projects\SE2\Wireless_Speaker\lwip\port/arch/sys_arch.h \
- C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h
+ C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h \
+ C:\Projects\SE2\Wireless_Speaker\source/genericFunctions.h
 
 ../lwip/contrib/apps/udpecho/udpecho.h:
 
@@ -129,3 +130,5 @@ C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/sys.h:
 C:\Projects\SE2\Wireless_Speaker\lwip\port/arch/sys_arch.h:
 
 C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h:
+
+C:\Projects\SE2\Wireless_Speaker\source/genericFunctions.h:

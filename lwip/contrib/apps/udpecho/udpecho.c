@@ -43,29 +43,74 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include "genericFunctions.h"
 
-SemaphoreHandle_t g_semaphore;
+#define DATA_LOW_OR 	0xFFFF
+#define DATA_HIGH_OR	0xFFFF0000
+#define BIT_SHIFTING	16
 
+SemaphoreHandle_t g_semaphore_UDP;
+SemaphoreHandle_t g_semaphore_Buffer;
+SemaphoreHandle_t g_semaphore_NewPORT;
+
+
+
+static void
+partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
+{
+	uint32_t lowPart;
+	uint32_t highPart;
+
+	lowPart = data;
+	highPart = data;
+
+	lowPart &= DATA_LOW_OR;
+	highPart &= DATA_HIGH_OR;
+	highPart = (highPart >> BIT_SHIFTING);
+
+	*dataLow = (uint16_t)lowPart;
+	*dataHigh = (uint16_t)highPart;
+}
+/*-----------------------------------------------------------------------------------*/
+static void
+buffers_Audio(void *arg)
+{
+	uint16_t bufferA[15000000][2];
+	uint16_t bufferB[15000000][2];
+
+	while(1)
+	{
+		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
+
+
+		xSemaphoreGive(g_semaphore_UDP);
+	}
+}
+/*-----------------------------------------------------------------------------------*/
 static void
 server_thread(void *arg)
 {
 	struct netconn *conn;
 	struct netbuf *buf;
 
-	uint32_t *msg;
+	uint32_t *packet;
 	uint16_t len;
+	uint16_t dataLow;
+	uint16_t dataHigh;
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
 	netconn_bind(conn, IP_ADDR_ANY, 50500);
-	//LWIP_ERROR("udpecho: invalid conn", (conn != NULL), return;);
 
-	xSemaphoreTake(g_semaphore, portMAX_DELAY);
+	xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
 	while (1)
 	{
 		netconn_recv(conn, &buf);
-		netbuf_data(buf, (void**)&msg, &len);
+		netbuf_data(buf, (void**)&packet, &len);
+		partBlock(&dataHigh, &dataLow, *packet);
+
 		netbuf_delete(buf);
+		xSemaphoreGive(g_semaphore_Buffer);
 	}
 }
 
@@ -79,9 +124,8 @@ client_thread(void *arg)
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
-	//LWIP_ERROR("udpecho: invalid conn", (conn != NULL), return;);
 
-	char *msg = "Hello loopback!";
+	char *msg = "Hello!";
 	buf = netbuf_new();
 	netbuf_ref(buf,msg,10);
 
@@ -96,11 +140,15 @@ client_thread(void *arg)
 void
 udpecho_init(void)
 {
-	g_semaphore = xSemaphoreCreateBinary();
+	g_semaphore_UDP = xSemaphoreCreateBinary();
+	g_semaphore_UDP = xSemaphoreCreateBinary();
+	g_semaphore_NewPORT = xSempahoreCreateBinary();
 
-	xTaskCreate(client_thread, "client", (4*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-	xTaskCreate(server_thread, "server", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-	xSemaphoreGive(g_semaphore);
+	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+
+	xSemaphoreGive(g_semaphore_UDP);
 	vTaskStartScheduler();
 }
 

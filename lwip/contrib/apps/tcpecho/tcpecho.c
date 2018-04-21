@@ -94,7 +94,7 @@ tcpecho_thread(void *arg)
 void
 tcpecho_init(void)
 {
-  sys_thread_new("tcpecho_thread", tcpecho_thread, NULL, DEFAULT_THREAD_STACKSIZE, DEFAULT_THREAD_PRIO);
+	xTaskCreate(tcpecho_thread, "tcpecho_thread", DEFAULT_THREAD_STACKSIZE, NULL, 4, NULL);
 }
 /*-----------------------------------------------------------------------------------*/
 

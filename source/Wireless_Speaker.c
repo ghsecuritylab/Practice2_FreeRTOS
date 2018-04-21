@@ -141,18 +141,7 @@ static void stack_init(void *arg)
     netif_set_default(&fsl_netif0);
     netif_set_up(&fsl_netif0);
 
-    PRINTF("\r\n************************************************\r\n");
-    PRINTF(" Echo example\r\n");
-    PRINTF("************************************************\r\n");
-    PRINTF(" IPv4 Address     : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_ipaddr)[0], ((u8_t *)&fsl_netif0_ipaddr)[1],
-           ((u8_t *)&fsl_netif0_ipaddr)[2], ((u8_t *)&fsl_netif0_ipaddr)[3]);
-    PRINTF(" IPv4 Subnet mask : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_netmask)[0], ((u8_t *)&fsl_netif0_netmask)[1],
-           ((u8_t *)&fsl_netif0_netmask)[2], ((u8_t *)&fsl_netif0_netmask)[3]);
-    PRINTF(" IPv4 Gateway     : %u.%u.%u.%u\r\n", ((u8_t *)&fsl_netif0_gw)[0], ((u8_t *)&fsl_netif0_gw)[1],
-           ((u8_t *)&fsl_netif0_gw)[2], ((u8_t *)&fsl_netif0_gw)[3]);
-    PRINTF("************************************************\r\n");
-
-    //tcpecho_init();
+    tcpecho_init();
     udpecho_init();
 }
 
@@ -170,18 +159,9 @@ int main(void)
     BOARD_InitDebugConsole();
     /* Disable SYSMPU. */
     base->CESR &= ~SYSMPU_CESR_VLD_MASK;
-#if 0
-	xTaskCreate(stack_init, "main", INIT_THREAD_STACKSIZE, NULL, INIT_THREAD_PRIO, NULL);
 
-    /* Initialize lwIP from thread */
-    if(sys_thread_new("main", stack_init, NULL, INIT_THREAD_STACKSIZE, INIT_THREAD_PRIO) == NULL)
-        LWIP_ASSERT("main(): Task creation failed.", 0);
-#endif
     stack_init(NULL);
 
-    for(;;)
-    {
-    }
     return 0;
 }
 #endif
