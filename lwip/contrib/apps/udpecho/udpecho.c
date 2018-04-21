@@ -48,12 +48,13 @@
 #define DATA_LOW_OR 	0xFFFF
 #define DATA_HIGH_OR	0xFFFF0000
 #define BIT_SHIFTING	16
+#define QUEUE_ELEMENTS	3
 
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 
-
+EventGroupHandle_t g_data_Buffer;
 
 static void
 partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
@@ -75,8 +76,9 @@ partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
 static void
 buffers_Audio(void *arg)
 {
-	uint16_t bufferA[15000000][2];
-	uint16_t bufferB[15000000][2];
+	uint16_t bufferA[2];
+	uint16_t bufferB[2];
+
 
 	while(1)
 	{
@@ -103,6 +105,8 @@ server_thread(void *arg)
 	netconn_bind(conn, IP_ADDR_ANY, 50500);
 
 	xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+	xSemaphoreGive(g_semaphore_Buffer);
+
 	while (1)
 	{
 		netconn_recv(conn, &buf);
@@ -110,7 +114,6 @@ server_thread(void *arg)
 		partBlock(&dataHigh, &dataLow, *packet);
 
 		netbuf_delete(buf);
-		xSemaphoreGive(g_semaphore_Buffer);
 	}
 }
 
@@ -143,6 +146,7 @@ udpecho_init(void)
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSempahoreCreateBinary();
+	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(time_msg_t*));
 
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
