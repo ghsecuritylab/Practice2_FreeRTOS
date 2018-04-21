@@ -8,7 +8,16 @@
 #ifndef GENERICFUNCTIONS_H_
 #define GENERICFUNCTIONS_H_
 
+void partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data);
 
+void pitInit();
 
+void pitSetPeriod(uint32_t period);
+
+void pitStartTimer();
+
+uint8_t getIsrFlag();
+
+void setIsrFlag(uint8_t flag);
 
 #endif /* GENERICFUNCTIONS_H_ */

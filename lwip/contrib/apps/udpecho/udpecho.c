@@ -44,46 +44,43 @@
 #include "semphr.h"
 #include "task.h"
 #include "genericFunctions.h"
+#include "fsl_pit.h"
 
-#define DATA_LOW_OR 	0xFFFF
-#define DATA_HIGH_OR	0xFFFF0000
-#define BIT_SHIFTING	16
-#define QUEUE_ELEMENTS	3
+#define QUEUE_ELEMENTS	1
+#define PERIOD_PIT		3
 
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 
-EventGroupHandle_t g_data_Buffer;
+QueueHandle_t g_data_Buffer;
 
-static void
-partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
+typedef struct
 {
-	uint32_t lowPart;
-	uint32_t highPart;
+	uint16_t dataLow;
+	uint16_t dataHigh;
+}dataBuffer_t;
 
-	lowPart = data;
-	highPart = data;
-
-	lowPart &= DATA_LOW_OR;
-	highPart &= DATA_HIGH_OR;
-	highPart = (highPart >> BIT_SHIFTING);
-
-	*dataLow = (uint16_t)lowPart;
-	*dataHigh = (uint16_t)highPart;
-}
 /*-----------------------------------------------------------------------------------*/
 static void
 buffers_Audio(void *arg)
 {
 	uint16_t bufferA[2];
 	uint16_t bufferB[2];
+	dataBuffer_t data_Queue;
 
-
+	pitInit();
+	pitSetPeriod(PERIOD_PIT);
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
+		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
+		bufferA[0] = data_Queue.dataLow;
+		bufferA[1] = data_Queue.dataHigh;
+		PRINTF("%d\r\n", bufferA[0]);
+		PRINTF("%d\r\n", bufferA[1]);
+		PRINTF("\r\n");
 
 		xSemaphoreGive(g_semaphore_UDP);
 	}
@@ -97,22 +94,32 @@ server_thread(void *arg)
 
 	uint32_t *packet;
 	uint16_t len;
-	uint16_t dataLow;
-	uint16_t dataHigh;
+	uint16_t dataLow = 0;
+	uint16_t dataHigh = 0;
+	dataBuffer_t data_Queue;
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
 	netconn_bind(conn, IP_ADDR_ANY, 50500);
 
-	xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
-	xSemaphoreGive(g_semaphore_Buffer);
-
 	while (1)
 	{
+		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+
+		pitStartTimer();
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 		partBlock(&dataHigh, &dataLow, *packet);
 
+		data_Queue.dataLow = dataLow;
+		data_Queue.dataHigh = dataHigh;
+
+		if(pdTRUE == PIT_GetStatusFlags(PIT, kPIT_Chnl_0))
+		{
+			PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
+			xSemaphoreGive(g_semaphore_Buffer);
+		}
 		netbuf_delete(buf);
 	}
 }
@@ -144,9 +151,9 @@ void
 udpecho_init(void)
 {
 	g_semaphore_UDP = xSemaphoreCreateBinary();
-	g_semaphore_UDP = xSemaphoreCreateBinary();
-	g_semaphore_NewPORT = xSempahoreCreateBinary();
-	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(time_msg_t*));
+	g_semaphore_Buffer = xSemaphoreCreateBinary();
+	g_semaphore_NewPORT = xSemaphoreCreateBinary();
+	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
