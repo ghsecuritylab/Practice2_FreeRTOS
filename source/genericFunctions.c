@@ -18,9 +18,31 @@
 #define DATA_LOW_OR 	0xFFFF
 #define DATA_HIGH_OR	0xFFFF0000
 #define BIT_SHIFTING	16
-
+#define DACBUFFERBASE (0)
+#define DACMAXVALUE	(0xFFF)
 
 uint8_t pitIsrFlag;
+
+void dacInit()
+{
+    dac_config_t dacConfig;
+
+	DAC_GetDefaultConfig(&dacConfig);
+	DAC_Init(DAC0, &dacConfig);
+	DAC_Enable(DAC0, true);
+	DAC_SetBufferReadPointer(DAC0, DACBUFFERBASE);
+
+
+}
+void dacSetValue(uint8_t dacValue)
+{
+	if(dacValue < DACMAXVALUE)
+	{
+	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, dacValue);
+	}
+
+
+}
 #if 0
 void PIT0_IRQHandler()
 {

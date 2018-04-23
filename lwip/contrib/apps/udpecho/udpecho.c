@@ -47,7 +47,8 @@
 #include "fsl_pit.h"
 
 #define QUEUE_ELEMENTS	1
-#define PERIOD_PIT		3
+#define N_ELEMENTS		2
+#define UDP_PORT		50500
 
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
@@ -65,23 +66,62 @@ typedef struct
 static void
 buffers_Audio(void *arg)
 {
-	uint16_t bufferA[2];
-	uint16_t bufferB[2];
+	const uint32_t frequencyPIT = 4800;
+	const uint32_t f_tx_Python = 100;
+	const uint32_t sizeBuffer = ((frequencyPIT)/(f_tx_Python));
+
+	uint16_t bufferA[sizeBuffer][N_ELEMENTS];
+	uint16_t bufferB[sizeBuffer][N_ELEMENTS];
 	dataBuffer_t data_Queue;
+	uint8_t flagPingPong = pdFALSE;
+	static uint32_t counterBlock = 0;
 
 	pitInit();
-	pitSetPeriod(PERIOD_PIT);
+	dacInit();
+	/**Fix the float*/
+	pitSetPeriod(0.0002);
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
-		bufferA[0] = data_Queue.dataLow;
-		bufferA[1] = data_Queue.dataHigh;
-		PRINTF("%d\r\n", bufferA[0]);
-		PRINTF("%d\r\n", bufferA[1]);
-		PRINTF("\r\n");
+		if(sizeBuffer > counterBlock)
+		{
+			switch(flagPingPong)
+			{
+			case pdFALSE:
+				bufferA[counterBlock][0] = data_Queue.dataLow;
+				bufferA[counterBlock][1] = data_Queue.dataHigh;
 
+				PRINTF("%d\r\n", bufferB[counterBlock][0]);
+				PRINTF("%d\r\n", bufferB[counterBlock][1]);
+				PRINTF("\r\n");
+
+				dacSetValue((uint8_t)bufferB[counterBlock][0]);
+				dacSetValue((uint8_t)bufferB[counterBlock][1]);
+
+				break;
+			case pdTRUE:
+				bufferB[counterBlock][0] = data_Queue.dataLow;
+				bufferB[counterBlock][1] = data_Queue.dataHigh;
+
+				PRINTF("%d\r\n", bufferA[counterBlock][0]);
+				PRINTF("%d\r\n", bufferA[counterBlock][1]);
+				PRINTF("\r\n");
+
+				dacSetValue((uint8_t)bufferA[counterBlock][0]);
+				dacSetValue((uint8_t)bufferA[counterBlock][1]);
+				break;
+			default:
+				break;
+			}
+			counterBlock++;
+		}
+		else if(sizeBuffer == counterBlock)
+		{
+			counterBlock = 0;
+			flagPingPong = !flagPingPong;
+		}
 		xSemaphoreGive(g_semaphore_UDP);
 	}
 }
@@ -100,7 +140,7 @@ server_thread(void *arg)
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
-	netconn_bind(conn, IP_ADDR_ANY, 50500);
+	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
 
 	while (1)
 	{
@@ -142,7 +182,7 @@ client_thread(void *arg)
 	IP4_ADDR(&dst_ip, 192, 168, 1, 65);
 	while (1)
 	{
-		netconn_sendto(conn, buf, &dst_ip, 50000);
+		netconn_sendto(conn, buf, &dst_ip, UDP_PORT);
 		vTaskDelay(1000);
 	}
 }
