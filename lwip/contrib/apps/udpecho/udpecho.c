@@ -53,6 +53,7 @@
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
+SemaphoreHandle_t g_semaphore_TCP;
 
 QueueHandle_t g_data_Buffer;
 
@@ -93,10 +94,6 @@ buffers_Audio(void *arg)
 				bufferA[counterBlock][0] = data_Queue.dataLow;
 				bufferA[counterBlock][1] = data_Queue.dataHigh;
 
-				PRINTF("%d\r\n", bufferB[counterBlock][0]);
-				PRINTF("%d\r\n", bufferB[counterBlock][1]);
-				PRINTF("\r\n");
-
 				dacSetValue((uint8_t)bufferB[counterBlock][0]);
 				dacSetValue((uint8_t)bufferB[counterBlock][1]);
 
@@ -104,10 +101,6 @@ buffers_Audio(void *arg)
 			case pdTRUE:
 				bufferB[counterBlock][0] = data_Queue.dataLow;
 				bufferB[counterBlock][1] = data_Queue.dataHigh;
-
-				PRINTF("%d\r\n", bufferA[counterBlock][0]);
-				PRINTF("%d\r\n", bufferA[counterBlock][1]);
-				PRINTF("\r\n");
 
 				dacSetValue((uint8_t)bufferA[counterBlock][0]);
 				dacSetValue((uint8_t)bufferA[counterBlock][1]);
@@ -193,13 +186,14 @@ udpecho_init(void)
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
+	g_semaphore_TCP = xSemaphoreCreateBinary();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
-
+/*
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-
-	xSemaphoreGive(g_semaphore_UDP);
+*/
+	xSemaphoreGive(g_semaphore_TCP);
 	vTaskStartScheduler();
 }
 
