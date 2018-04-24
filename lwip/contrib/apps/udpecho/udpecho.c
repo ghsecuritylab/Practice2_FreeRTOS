@@ -54,6 +54,7 @@ SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 SemaphoreHandle_t g_semaphore_TCP;
+SemaphoreHandle_t g_semaphore_MenuPressed;
 
 QueueHandle_t g_data_Buffer;
 
@@ -187,6 +188,7 @@ udpecho_init(void)
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
 	g_semaphore_TCP = xSemaphoreCreateBinary();
+	g_semaphore_MenuPressed = xSemaphoreCreateBinary();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 /*
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
