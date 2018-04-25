@@ -62,6 +62,7 @@ tcp_server(void *arg)
   struct netconn *conn, *newconn;
   err_t err;
   uint32_t optionPressed;
+  uint32_t flagMenu;
   LWIP_UNUSED_ARG(arg);
 #if 0
   xSemaphoreTake(g_semaphore_MenuPressed, portMAX_DELAY);
@@ -74,6 +75,7 @@ tcp_server(void *arg)
   /* Tell connection to go into listening mode. */
   netconn_listen(conn);
   xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
+
   while (1)
   {
 	  /* Grab new connection. */
@@ -82,17 +84,21 @@ tcp_server(void *arg)
 	  if (err == ERR_OK)
 	  {
 		  struct netbuf *buf;
-		  void *data;
+		  uint32_t *packet;
 		  u16_t len;
 
 		  while ((err = netconn_recv(newconn, &buf)) == ERR_OK)
 		  {
 			  do
 			  {
-				  netbuf_data(buf, &data, &len);
+				  netbuf_data(buf, (void**)&packet, &len);
 				  //err = netconn_write(newconn, packet, len, NETCONN_COPY);
 			  } while (netbuf_next(buf) >= 0);
-			  optionPressed = (uint32_t)buf->ptr->payload;
+			  optionPressed = *packet;
+			  //optionPressed = (uint32_t)buf->ptr->payload;
+			  //flagMenu = *(&optionPressed);
+
+
 			  netbuf_delete(buf);
 		  }
 		  /* Close connection and discard connection identifier. */
@@ -149,9 +155,7 @@ tcp_client(void *arg)
 			netconn_write_partly(conn, data, len, NETCONN_COPY, NULL);
 			vTaskDelay(1000);
 		}
-#if 0
 		xSemaphoreGive(g_semaphore_MenuPressed);
-#endif
 	}
 }
 /*-----------------------------------------------------------------------------------*/
