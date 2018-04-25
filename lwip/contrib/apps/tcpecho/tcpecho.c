@@ -52,6 +52,7 @@
 
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern SemaphoreHandle_t g_semaphore_MenuPressed;
+extern QueueHandle_t g_data_Menu;
 
 /*-----------------------------------------------------------------------------------*/
 
@@ -60,7 +61,11 @@ tcp_server(void *arg)
 {
   struct netconn *conn, *newconn;
   err_t err;
+  uint32_t optionPressed;
   LWIP_UNUSED_ARG(arg);
+#if 0
+  xSemaphoreTake(g_semaphore_MenuPressed, portMAX_DELAY);
+#endif
 
   /* Create a new connection identifier. */
   conn = netconn_new(NETCONN_TCP);
@@ -68,11 +73,9 @@ tcp_server(void *arg)
 
   /* Tell connection to go into listening mode. */
   netconn_listen(conn);
-
+  xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
   while (1)
   {
-	  xSemaphoreTake(g_semaphore_MenuPressed, portMAX_DELAY);
-
 	  /* Grab new connection. */
 	  err = netconn_accept(conn, &newconn);
 	  /* Process the new connection. */
@@ -87,8 +90,9 @@ tcp_server(void *arg)
 			  do
 			  {
 				  netbuf_data(buf, &data, &len);
-				  err = netconn_write(newconn, data, len, NETCONN_COPY);
+				  //err = netconn_write(newconn, packet, len, NETCONN_COPY);
 			  } while (netbuf_next(buf) >= 0);
+			  optionPressed = (uint32_t)buf->ptr->payload;
 			  netbuf_delete(buf);
 		  }
 		  /* Close connection and discard connection identifier. */
@@ -134,12 +138,10 @@ tcp_client(void *arg)
 	};
 
 	buf = netbuf_new();
-	IP4_ADDR(&dst_ip, 192, 168, 1, 64);
+	IP4_ADDR(&dst_ip, 192, 168, 1, 69);
 	netconn_connect(conn, &dst_ip, TCP_PORT);
 	while(1)
 	{
-		xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
-
 		for(counterPrint = 0; counterPrint < MENU_ELEMENTS; counterPrint++)
 		{
 			netbuf_ref(buf, *(&menus[counterPrint]), sizes[counterPrint]);
@@ -147,15 +149,19 @@ tcp_client(void *arg)
 			netconn_write_partly(conn, data, len, NETCONN_COPY, NULL);
 			vTaskDelay(1000);
 		}
+#if 0
 		xSemaphoreGive(g_semaphore_MenuPressed);
+#endif
 	}
 }
 /*-----------------------------------------------------------------------------------*/
 void
 tcpecho_init(void)
 {
+
 	xTaskCreate(tcp_server, "ServerTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+
 }
 /*-----------------------------------------------------------------------------------*/
 

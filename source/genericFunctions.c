@@ -43,16 +43,8 @@ void dacSetValue(uint8_t dacValue)
 
 
 }
-#if 0
-void PIT0_IRQHandler()
-{
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-	PRINTF("\r\n Channel No.0 interrupt is occured !\n");
 
-    pitIsrFlag = 1;
 
-}
-#endif
 void partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
 {
 	uint32_t lowPart;

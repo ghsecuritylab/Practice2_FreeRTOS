@@ -57,13 +57,24 @@ SemaphoreHandle_t g_semaphore_TCP;
 SemaphoreHandle_t g_semaphore_MenuPressed;
 
 QueueHandle_t g_data_Buffer;
+QueueHandle_t g_data_Menu;
 
 typedef struct
 {
 	uint16_t dataLow;
 	uint16_t dataHigh;
 }dataBuffer_t;
+/*
+void PIT0_IRQHandler()
+{
+	BaseType_t xHigherPriorityTaskWoken;
+    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
+    xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+}
+*/
 /*-----------------------------------------------------------------------------------*/
 static void
 buffers_Audio(void *arg)
@@ -154,6 +165,7 @@ server_thread(void *arg)
 			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 			xSemaphoreGive(g_semaphore_Buffer);
 		}
+
 		netbuf_delete(buf);
 	}
 }
@@ -190,6 +202,7 @@ udpecho_init(void)
 	g_semaphore_TCP = xSemaphoreCreateBinary();
 	g_semaphore_MenuPressed = xSemaphoreCreateBinary();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
+	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
 /*
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
