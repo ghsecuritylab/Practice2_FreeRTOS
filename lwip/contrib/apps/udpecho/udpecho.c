@@ -114,19 +114,19 @@ buffers_Audio(void *arg)
 			switch(flagPingPong)
 			{
 			case pdFALSE:
-				bufferA[counterBlock][0] = (data_Queue.dataLow>>3);
-				bufferA[counterBlock][1] = (data_Queue.dataHigh>>4);
+				bufferA[counterBlock][0] = ((data_Queue.dataLow)>>3);
+				//bufferA[counterBlock][1] = ((data_Queue.dataHigh+32768)>>3);
 
-				//dacSetValue((uint8_t)bufferB[counterBlock][1]);
-				dacSetValue((uint8_t)bufferB[counterBlock][0]);
+				dacSetValue((uint16_t)bufferB[counterBlock][0]);
+				//dacSetValue((uint16_t)bufferB[counterBlock][1]);
 
 				break;
 			case pdTRUE:
-				bufferB[counterBlock][0] = (data_Queue.dataLow>>3);
-				bufferB[counterBlock][1] = (data_Queue.dataHigh>>4);
+				bufferB[counterBlock][0] = ((data_Queue.dataLow)>>3);
+				//bufferB[counterBlock][1] = ((data_Queue.dataHigh+32768)>>3);
 
-				//dacSetValue((uint8_t)bufferA[counterBlock][1]);
-				dacSetValue((uint8_t)bufferA[counterBlock][0]);
+				dacSetValue((uint16_t)bufferA[counterBlock][0]);
+				//dacSetValue((uint16_t)bufferA[counterBlock][1]);
 				break;
 			default:
 				break;
@@ -213,8 +213,10 @@ client_thread(void *arg)
 void
 udpecho_init(void)
 {
+#if 0
 	NVIC_EnableIRQ(PIT0_IRQn);
 	NVIC_SetPriority(PIT0_IRQn,6);
+#endif
 
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
@@ -226,11 +228,10 @@ udpecho_init(void)
 
 #if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-#endif
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-
-	xSemaphoreGive(g_semaphore_UDP);
+#endif
+	xSemaphoreGive(g_semaphore_TCP);
 	vTaskStartScheduler();
 }
 

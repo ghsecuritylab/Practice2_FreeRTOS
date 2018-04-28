@@ -44,7 +44,7 @@
 #include "task.h"
 
 #define TCP_PORT		50500
-#define MENU_ELEMENTS	4
+#define MENU_ELEMENTS	5
 #define SIZE_LINE_0		35
 #define SIZE_LINE_1		30
 #define SIZE_LINE_2		28
@@ -73,8 +73,9 @@ tcp_server(void *arg)
 
   /* Tell connection to go into listening mode. */
   netconn_listen(conn);
+#if 1
   xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
-
+#endif
   while (1)
   {
 	  /* Grab new connection. */
@@ -90,10 +91,12 @@ tcp_server(void *arg)
 		  {
 			  do
 			  {
-				  netbuf_data(buf, (void*)packet, &len);
+				  netbuf_data(buf, (void**)&packet, &len);
 				  //err = netconn_write(newconn, packet, len, NETCONN_COPY);
 			  } while (netbuf_next(buf) >= 0);
 			  optionPressed = *packet;
+			  optionPressed &= 0xF0000;
+			  optionPressed = optionPressed >> 16;
 			  netbuf_delete(buf);
 		  }
 		  /* Close connection and discard connection identifier. */
@@ -118,16 +121,18 @@ tcp_client(void *arg)
 	conn = netconn_new(NETCONN_TCP);
 
 	char *menu_Line0 = "***************MENU***************";
-	char *menu_Line1 = "Play/Stop               [P/S]";
-	char *menu_Line2 = "Select                  [E]";
-	char *menu_Line3 = "Connection statistics   [C]";
+	char *menu_Line1 = "Play                    [1]";
+	char *menu_Line2 = "Stop                    [2]";
+	char *menu_Line3 = "Select                  [3]";
+	char *menu_Line4 = "Connection statistics   [4]";
 
 	char *menus[MENU_ELEMENTS] =
 	{
 			menu_Line0,
 			menu_Line1,
 			menu_Line2,
-			menu_Line3
+			menu_Line3,
+			menu_Line4
 	};
 
 	uint8_t sizes[MENU_ELEMENTS] =
@@ -135,7 +140,8 @@ tcp_client(void *arg)
 			SIZE_LINE_0,
 			SIZE_LINE_1,
 			SIZE_LINE_2,
-			SIZE_LINE_3
+			SIZE_LINE_3,
+			SIZE_LINE_4
 	};
 
 	buf = netbuf_new();
@@ -157,7 +163,7 @@ tcp_client(void *arg)
 void
 tcpecho_init(void)
 {
-#if 0
+#if 1
 	xTaskCreate(tcp_server, "ServerTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 #endif
