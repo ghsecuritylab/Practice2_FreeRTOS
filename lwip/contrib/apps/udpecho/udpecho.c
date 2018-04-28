@@ -55,7 +55,6 @@ SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 SemaphoreHandle_t g_semaphore_TCP;
-SemaphoreHandle_t g_semaphore_MenuPressed;
 
 QueueHandle_t g_data_Buffer;
 QueueHandle_t g_data_Menu;
@@ -80,7 +79,6 @@ void PIT0_IRQHandler()
     data_QueueSend.dataHigh = data_QueueReceived.dataHigh;
     data_QueueSend.dataLow = data_QueueReceived.dataLow;
 	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
-	PRINTF("DATA SEND\r\n");
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
@@ -102,7 +100,7 @@ buffers_Audio(void *arg)
 	pitInit();
 	dacInit();
 	/**Fix the float*/
-	pitSetPeriod(0.0002);
+	pitSetPeriod(1);
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
@@ -160,7 +158,8 @@ server_thread(void *arg)
 	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
 
 	while (1)
-	{	xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+	{
+		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
 		blockSent = pdFALSE;
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
@@ -175,14 +174,6 @@ server_thread(void *arg)
 			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 			blockSent = pdTRUE;
 		}
-#if 0
-		if(pdTRUE == PIT_GetStatusFlags(PIT, kPIT_Chnl_0))
-		{
-			PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
-			xSemaphoreGive(g_semaphore_Buffer);
-		}
-#endif
 		netbuf_delete(buf);
 	}
 }
@@ -222,7 +213,6 @@ udpecho_init(void)
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
 	g_semaphore_TCP = xSemaphoreCreateBinary();
-	g_semaphore_MenuPressed = xSemaphoreCreateBinary();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
 
