@@ -145,9 +145,6 @@ static void stack_init(void *arg)
     udpecho_init();
 }
 
-/*!
- * @brief Main function
- */
 int main(void)
 {
     SYSMPU_Type *base = SYSMPU;

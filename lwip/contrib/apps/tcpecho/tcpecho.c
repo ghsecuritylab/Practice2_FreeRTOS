@@ -53,9 +53,9 @@
 
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern QueueHandle_t g_data_Menu;
+extern EventGroupHandle_t g_events_Menu;
 
 /*-----------------------------------------------------------------------------------*/
-
 static void 
 tcp_server(void *arg)
 {
@@ -63,6 +63,7 @@ tcp_server(void *arg)
 	struct netbuf *newbuf;
 	uint8_t counterPrint;
     void *data;
+    uint8_t flagMenu = pdFALSE;
     u16_t lenNew;
 
     struct netconn *conn, *newconn;
@@ -101,10 +102,9 @@ tcp_server(void *arg)
 
     /* Tell connection to go into listening mode. */
     netconn_listen(conn);
-
-    xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
     while (1)
     {
+        xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
     	/* Grab new connection. */
     	err = netconn_accept(conn, &newconn);
     	/* Process the new connection. */
@@ -124,26 +124,31 @@ tcp_server(void *arg)
     			optionPressed = *packet;
     			optionPressed &= 0xF0000;
     			optionPressed = optionPressed >> 16;
-    			netbuf_delete(buf);
 
-    			newbuf = netbuf_new();
-	    		for(counterPrint = 0; counterPrint < MENU_ELEMENTS; counterPrint++)
-	    		{
-	    			netbuf_ref(newbuf, *(&menus[counterPrint]), sizes[counterPrint]);
-	    		    netbuf_data(newbuf, &data, &lenNew);
-	    			netconn_write(newconn, data, lenNew, NETCONN_COPY);
-	    			vTaskDelay(1000);
-	    		}
-    			netbuf_delete(newbuf);
+    			netbuf_delete(buf);
+    			if(pdFALSE == flagMenu)
+    			{
+        			newbuf = netbuf_new();
+    	    		for(counterPrint = 0; counterPrint < MENU_ELEMENTS; counterPrint++)
+    	    		{
+    	    			netbuf_ref(newbuf, *(&menus[counterPrint]), sizes[counterPrint]);
+    	    		    netbuf_data(newbuf, &data, &lenNew);
+    	    			netconn_write(newconn, data, lenNew, NETCONN_COPY);
+    	    			vTaskDelay(1000);
+    	    		}
+        			netbuf_delete(newbuf);
+        			flagMenu = pdTRUE;
+    			}
     		}
     		/* Close connection and discard connection identifier. */
     		netconn_close(newconn);
     		netconn_delete(newconn);
+			xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
     	}
     }
 }
 /*-----------------------------------------------------------------------------------*/
-
+#if 0
 static void
 tcp_client(void *arg)
 {
@@ -196,15 +201,15 @@ tcp_client(void *arg)
 		xSemaphoreGive(g_semaphore_MenuPressed);
 	}
 }
+#endif
 /*-----------------------------------------------------------------------------------*/
 void
 tcpecho_init(void)
 {
-#if 1
 	xTaskCreate(tcp_server, "ServerTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-	//xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+#if 0
+	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 #endif
-
 }
 /*-----------------------------------------------------------------------------------*/
 

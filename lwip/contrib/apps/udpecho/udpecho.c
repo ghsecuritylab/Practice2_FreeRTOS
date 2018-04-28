@@ -51,10 +51,16 @@
 #define N_ELEMENTS		2
 #define UDP_PORT		50500
 
+#define EVENT_PLAY		(1<<0)
+#define EVENT_STOP		(1<<1)
+#define EVENT_SELECT	(1<<2)
+#define EVENT_CONN		(1<<3)
+
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 SemaphoreHandle_t g_semaphore_TCP;
+EventGroupHandle_t g_events_Menu;
 
 QueueHandle_t g_data_Buffer;
 QueueHandle_t g_data_Menu;
@@ -65,6 +71,7 @@ typedef struct
 	uint16_t dataHigh;
 }dataBuffer_t;
 
+/*-----------------------------------------------------------------------------------*/
 void PIT0_IRQHandler()
 {
 	dataBuffer_t data_QueueReceived;
@@ -104,7 +111,7 @@ buffers_Audio(void *arg)
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
-		PIT_StopTimer(PIT, kPIT_Chnl_0);
+		//PIT_StopTimer(PIT, kPIT_Chnl_0);
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
 		if(sizeBuffer > counterBlock)
@@ -156,7 +163,6 @@ server_thread(void *arg)
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
 	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
-
 	while (1)
 	{
 		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
@@ -179,6 +185,7 @@ server_thread(void *arg)
 }
 
 /*-----------------------------------------------------------------------------------*/
+#if 0
 static void
 client_thread(void *arg)
 {
@@ -200,28 +207,29 @@ client_thread(void *arg)
 		vTaskDelay(1000);
 	}
 }
+#endif
 /*-----------------------------------------------------------------------------------*/
 void
 udpecho_init(void)
 {
-#if 0
 	NVIC_EnableIRQ(PIT0_IRQn);
 	NVIC_SetPriority(PIT0_IRQn,6);
-#endif
 
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
 	g_semaphore_TCP = xSemaphoreCreateBinary();
+	g_events_Menu = xEventGroupCreate();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
 
 #if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+#endif
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-#endif
-	xSemaphoreGive(g_semaphore_TCP);
+
+	xSemaphoreGive(g_semaphore_UDP);
 	vTaskStartScheduler();
 }
 
