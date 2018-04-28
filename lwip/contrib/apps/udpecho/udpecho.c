@@ -40,6 +40,7 @@
 #include "lwip/sys.h"
 
 #include "MK64F12.h"
+#include "clock_config.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
@@ -64,17 +65,26 @@ typedef struct
 	uint16_t dataLow;
 	uint16_t dataHigh;
 }dataBuffer_t;
-/*
+
 void PIT0_IRQHandler()
 {
+	dataBuffer_t data_QueueReceived;
+	dataBuffer_t data_QueueSend;
 	BaseType_t xHigherPriorityTaskWoken;
     PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
     xHigherPriorityTaskWoken = pdFALSE;
+	PIT_StopTimer(PIT, kPIT_Chnl_0);
     xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
+	xQueueReceiveFromISR(g_data_Buffer, &data_QueueReceived, &xHigherPriorityTaskWoken);
+    data_QueueSend.dataHigh = data_QueueReceived.dataHigh;
+    data_QueueSend.dataLow = data_QueueReceived.dataLow;
+	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
+	PRINTF("DATA SEND\r\n");
+
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
-*/
+
 /*-----------------------------------------------------------------------------------*/
 static void
 buffers_Audio(void *arg)
@@ -96,6 +106,7 @@ buffers_Audio(void *arg)
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
+		PIT_StopTimer(PIT, kPIT_Chnl_0);
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
 		if(sizeBuffer > counterBlock)
@@ -103,19 +114,19 @@ buffers_Audio(void *arg)
 			switch(flagPingPong)
 			{
 			case pdFALSE:
-				bufferA[counterBlock][0] = data_Queue.dataLow;
-				bufferA[counterBlock][1] = data_Queue.dataHigh;
+				bufferA[counterBlock][0] = (data_Queue.dataLow>>3);
+				bufferA[counterBlock][1] = (data_Queue.dataHigh>>4);
 
+				//dacSetValue((uint8_t)bufferB[counterBlock][1]);
 				dacSetValue((uint8_t)bufferB[counterBlock][0]);
-				dacSetValue((uint8_t)bufferB[counterBlock][1]);
 
 				break;
 			case pdTRUE:
-				bufferB[counterBlock][0] = data_Queue.dataLow;
-				bufferB[counterBlock][1] = data_Queue.dataHigh;
+				bufferB[counterBlock][0] = (data_Queue.dataLow>>3);
+				bufferB[counterBlock][1] = (data_Queue.dataHigh>>4);
 
+				//dacSetValue((uint8_t)bufferA[counterBlock][1]);
 				dacSetValue((uint8_t)bufferA[counterBlock][0]);
-				dacSetValue((uint8_t)bufferA[counterBlock][1]);
 				break;
 			default:
 				break;
@@ -139,6 +150,7 @@ server_thread(void *arg)
 
 	uint32_t *packet;
 	uint16_t len;
+	uint8_t blockSent;
 	uint16_t dataLow = 0;
 	uint16_t dataHigh = 0;
 	dataBuffer_t data_Queue;
@@ -148,10 +160,8 @@ server_thread(void *arg)
 	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
 
 	while (1)
-	{
-		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
-
-		pitStartTimer();
+	{	xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+		blockSent = pdFALSE;
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 		partBlock(&dataHigh, &dataLow, *packet);
@@ -159,13 +169,20 @@ server_thread(void *arg)
 		data_Queue.dataLow = dataLow;
 		data_Queue.dataHigh = dataHigh;
 
+		pitStartTimer();
+		if(pdFALSE == blockSent)
+		{
+			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
+			blockSent = pdTRUE;
+		}
+#if 0
 		if(pdTRUE == PIT_GetStatusFlags(PIT, kPIT_Chnl_0))
 		{
 			PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 			xSemaphoreGive(g_semaphore_Buffer);
 		}
-
+#endif
 		netbuf_delete(buf);
 	}
 }
@@ -196,6 +213,9 @@ client_thread(void *arg)
 void
 udpecho_init(void)
 {
+	NVIC_EnableIRQ(PIT0_IRQn);
+	NVIC_SetPriority(PIT0_IRQn,6);
+
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
@@ -203,12 +223,14 @@ udpecho_init(void)
 	g_semaphore_MenuPressed = xSemaphoreCreateBinary();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
-/*
+
+#if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+#endif
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-*/
-	xSemaphoreGive(g_semaphore_TCP);
+
+	xSemaphoreGive(g_semaphore_UDP);
 	vTaskStartScheduler();
 }
 

@@ -62,7 +62,6 @@ tcp_server(void *arg)
   struct netconn *conn, *newconn;
   err_t err;
   uint32_t optionPressed;
-  uint32_t flagMenu;
   LWIP_UNUSED_ARG(arg);
 #if 0
   xSemaphoreTake(g_semaphore_MenuPressed, portMAX_DELAY);
@@ -91,14 +90,10 @@ tcp_server(void *arg)
 		  {
 			  do
 			  {
-				  netbuf_data(buf, (void**)&packet, &len);
+				  netbuf_data(buf, (void*)packet, &len);
 				  //err = netconn_write(newconn, packet, len, NETCONN_COPY);
 			  } while (netbuf_next(buf) >= 0);
 			  optionPressed = *packet;
-			  //optionPressed = (uint32_t)buf->ptr->payload;
-			  //flagMenu = *(&optionPressed);
-
-
 			  netbuf_delete(buf);
 		  }
 		  /* Close connection and discard connection identifier. */
@@ -162,9 +157,10 @@ tcp_client(void *arg)
 void
 tcpecho_init(void)
 {
-
+#if 0
 	xTaskCreate(tcp_server, "ServerTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+#endif
 
 }
 /*-----------------------------------------------------------------------------------*/

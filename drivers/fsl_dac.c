@@ -169,9 +169,9 @@ void DAC_GetDefaultBufferConfig(dac_buffer_config_t *config)
 void DAC_SetBufferValue(DAC_Type *base, uint8_t index, uint16_t value)
 {
     assert(index < DAC_DATL_COUNT);
-
     base->DAT[index].DATL = (uint8_t)(0xFFU & value);         /* Low 8-bit. */
     base->DAT[index].DATH = (uint8_t)((0xF00U & value) >> 8); /* High 4-bit. */
+
 }
 
 void DAC_SetBufferReadPointer(DAC_Type *base, uint8_t index)
