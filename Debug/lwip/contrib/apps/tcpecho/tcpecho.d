@@ -42,7 +42,10 @@ lwip/contrib/apps/tcpecho/tcpecho.o lwip/contrib/apps/tcpecho/tcpecho.d: \
  C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/ip4_addr.h \
  C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/ip6_addr.h \
  C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/def.h \
- C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h
+ C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h \
+ C:\Projects\SE2\Wireless_Speaker\freertos\include/event_groups.h \
+ C:\Projects\SE2\Wireless_Speaker\freertos\include/timers.h \
+ C:\Projects\SE2\Wireless_Speaker\freertos\include/task.h
 
 ../lwip/contrib/apps/tcpecho/tcpecho.h:
 
@@ -129,3 +132,9 @@ C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/ip6_addr.h:
 C:\Projects\SE2\Wireless_Speaker\lwip\src\include/lwip/def.h:
 
 C:\Projects\SE2\Wireless_Speaker\CMSIS/MK64F12.h:
+
+C:\Projects\SE2\Wireless_Speaker\freertos\include/event_groups.h:
+
+C:\Projects\SE2\Wireless_Speaker\freertos\include/timers.h:
+
+C:\Projects\SE2\Wireless_Speaker\freertos\include/task.h:

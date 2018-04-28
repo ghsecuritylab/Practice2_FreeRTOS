@@ -44,6 +44,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include "event_groups.h"
 #include "genericFunctions.h"
 #include "fsl_pit.h"
 
@@ -60,6 +61,7 @@ SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
 SemaphoreHandle_t g_semaphore_NewPORT;
 SemaphoreHandle_t g_semaphore_TCP;
+SemaphoreHandle_t g_semaphore_returnMenu;
 EventGroupHandle_t g_events_Menu;
 
 QueueHandle_t g_data_Buffer;
@@ -67,8 +69,7 @@ QueueHandle_t g_data_Menu;
 
 typedef struct
 {
-	uint16_t dataLow;
-	uint16_t dataHigh;
+	int16_t data;
 }dataBuffer_t;
 
 /*-----------------------------------------------------------------------------------*/
@@ -83,8 +84,7 @@ void PIT0_IRQHandler()
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
     xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
 	xQueueReceiveFromISR(g_data_Buffer, &data_QueueReceived, &xHigherPriorityTaskWoken);
-    data_QueueSend.dataHigh = data_QueueReceived.dataHigh;
-    data_QueueSend.dataLow = data_QueueReceived.dataLow;
+    data_QueueSend.data = data_QueueReceived.data;
 	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
@@ -98,9 +98,10 @@ buffers_Audio(void *arg)
 	const uint32_t f_tx_Python = 100;
 	const uint32_t sizeBuffer = ((frequencyPIT)/(f_tx_Python));
 
-	uint16_t bufferA[sizeBuffer][N_ELEMENTS];
-	uint16_t bufferB[sizeBuffer][N_ELEMENTS];
+	uint16_t bufferA[sizeBuffer];
+	uint16_t bufferB[sizeBuffer];
 	dataBuffer_t data_Queue;
+	uint8_t flagStop = pdFALSE;
 	uint8_t flagPingPong = pdFALSE;
 	static uint32_t counterBlock = 0;
 
@@ -114,34 +115,41 @@ buffers_Audio(void *arg)
 		//PIT_StopTimer(PIT, kPIT_Chnl_0);
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
-		if(sizeBuffer > counterBlock)
+		if(pdFALSE)
+		{
+			xEventGroupWaitBits(g_events_Menu, EVENT_STOP,
+				pdTRUE, pdTRUE, portMAX_DELAY);
+			flagStop = pdTRUE;
+		}
+
+		if((sizeBuffer > counterBlock) && (pdFALSE == flagStop))
 		{
 			switch(flagPingPong)
 			{
 			case pdFALSE:
-				bufferA[counterBlock][0] = ((data_Queue.dataLow)>>3);
-				//bufferA[counterBlock][1] = ((data_Queue.dataHigh+32768)>>3);
-
-				dacSetValue((uint16_t)bufferB[counterBlock][0]);
-				//dacSetValue((uint16_t)bufferB[counterBlock][1]);
+				bufferA[counterBlock] = (data_Queue.data);
+				dacSetValue(bufferB[counterBlock]);
 
 				break;
 			case pdTRUE:
-				bufferB[counterBlock][0] = ((data_Queue.dataLow)>>3);
-				//bufferB[counterBlock][1] = ((data_Queue.dataHigh+32768)>>3);
-
-				dacSetValue((uint16_t)bufferA[counterBlock][0]);
-				//dacSetValue((uint16_t)bufferA[counterBlock][1]);
+				bufferB[counterBlock] = (data_Queue.data);
+				dacSetValue(bufferA[counterBlock]);
 				break;
 			default:
 				break;
 			}
 			counterBlock++;
 		}
-		else if(sizeBuffer == counterBlock)
+		else if((sizeBuffer == counterBlock) && (pdFALSE == flagStop))
 		{
 			counterBlock = 0;
 			flagPingPong = !flagPingPong;
+		}
+
+		if(pdTRUE == flagStop)
+		{
+			flagStop = pdFALSE;
+			xSemaphoreGive(g_semaphore_returnMenu);
 		}
 		xSemaphoreGive(g_semaphore_UDP);
 	}
@@ -156,23 +164,26 @@ server_thread(void *arg)
 	uint32_t *packet;
 	uint16_t len;
 	uint8_t blockSent;
-	uint16_t dataLow = 0;
-	uint16_t dataHigh = 0;
+	int16_t data = 0;
 	dataBuffer_t data_Queue;
 
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
 	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
+/*
+	xEventGroupWaitBits(g_events_Menu, EVENT_PLAY,
+		pdTRUE, pdTRUE, portMAX_DELAY);
+*/
 	while (1)
 	{
 		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+
 		blockSent = pdFALSE;
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
-		partBlock(&dataHigh, &dataLow, *packet);
+		partBlock(&data, *packet);
 
-		data_Queue.dataLow = dataLow;
-		data_Queue.dataHigh = dataHigh;
+		data_Queue.data = data;
 
 		pitStartTimer();
 		if(pdFALSE == blockSent)
@@ -219,6 +230,7 @@ udpecho_init(void)
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
 	g_semaphore_NewPORT = xSemaphoreCreateBinary();
 	g_semaphore_TCP = xSemaphoreCreateBinary();
+	g_semaphore_returnMenu = xSemaphoreCreateBinary();
 	g_events_Menu = xEventGroupCreate();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
@@ -226,8 +238,8 @@ udpecho_init(void)
 #if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 #endif
-	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
+	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 
 	xSemaphoreGive(g_semaphore_UDP);
 	vTaskStartScheduler();

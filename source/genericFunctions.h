@@ -12,9 +12,9 @@
 
 void dacInit();
 
-void dacSetValue(uint8_t value);
+void dacSetValue(int16_t value);
 
-void partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data);
+void partBlock(int16_t *dataAudio, uint16_t data);
 
 void pitInit();
 

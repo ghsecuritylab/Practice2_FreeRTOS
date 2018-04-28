@@ -37,31 +37,21 @@ void dacInit()
 
 
 }
-void dacSetValue(uint8_t dacValue)
+void dacSetValue(int16_t dacValue)
 {
 	if(dacValue < DACMAXVALUE)
 	{
-	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, dacValue);
+	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2024));
 	}
-
-
 }
 
-
-void partBlock(uint16_t *dataHigh, uint16_t *dataLow, uint32_t data)
+void partBlock(int16_t *dataAudio, uint16_t data)
 {
-	uint32_t lowPart;
-	uint32_t highPart;
+	int16_t part;
 
-	lowPart = data;
-	highPart = data;
-
-	lowPart &= DATA_LOW_OR;
-	highPart &= DATA_HIGH_OR;
-	highPart = (highPart >> BIT_SHIFTING);
-
-	*dataLow = (uint16_t)lowPart;
-	*dataHigh = (uint16_t)highPart;
+	part = (int16_t)data;
+	part = part / 16;
+	*dataAudio = part;
 }
 
 void pitInit()

@@ -42,8 +42,9 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
+#include "event_groups.h"
 
-#define TCP_PORT		50500
+#define TCP_PORT		50700
 #define MENU_ELEMENTS	5
 #define SIZE_LINE_0		28
 #define SIZE_LINE_1		28
@@ -54,6 +55,7 @@
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern QueueHandle_t g_data_Menu;
 extern EventGroupHandle_t g_events_Menu;
+extern SemaphoreHandle_t g_semaphore_returnMenu;
 
 /*-----------------------------------------------------------------------------------*/
 static void 
@@ -63,7 +65,8 @@ tcp_server(void *arg)
 	struct netbuf *newbuf;
 	uint8_t counterPrint;
     void *data;
-    uint8_t flagMenu = pdFALSE;
+    uint8_t flagMenu;
+    uint8_t counterReceive;
     u16_t lenNew;
 
     struct netconn *conn, *newconn;
@@ -102,9 +105,11 @@ tcp_server(void *arg)
 
     /* Tell connection to go into listening mode. */
     netconn_listen(conn);
+    xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
     while (1)
     {
-        xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
+        flagMenu = pdFALSE;
+        counterReceive = 0;
     	/* Grab new connection. */
     	err = netconn_accept(conn, &newconn);
     	/* Process the new connection. */
@@ -122,8 +127,7 @@ tcp_server(void *arg)
 
     			} while (netbuf_next(buf) >= 0);
     			optionPressed = *packet;
-    			optionPressed &= 0xF0000;
-    			optionPressed = optionPressed >> 16;
+    			optionPressed &= 0xF;
 
     			netbuf_delete(buf);
     			if(pdFALSE == flagMenu)
@@ -139,11 +143,17 @@ tcp_server(void *arg)
         			netbuf_delete(newbuf);
         			flagMenu = pdTRUE;
     			}
+    			counterReceive++;
+    			if(2 == counterReceive)
+    			{
+    				break;
+    			}
     		}
     		/* Close connection and discard connection identifier. */
-    		netconn_close(newconn);
-    		netconn_delete(newconn);
+    		//netconn_close(newconn);
+    		//netconn_delete(newconn);
 			xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
+			xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
     	}
     }
 }
