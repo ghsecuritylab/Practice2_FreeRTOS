@@ -44,7 +44,7 @@
 #include "task.h"
 #include "event_groups.h"
 
-#define TCP_PORT		50700
+#define TCP_PORT		50200
 #define MENU_ELEMENTS	5
 #define SIZE_LINE_0		28
 #define SIZE_LINE_1		28
@@ -97,19 +97,20 @@ tcp_server(void *arg)
 			SIZE_LINE_3,
 			SIZE_LINE_4
 	};
-	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
+	IP4_ADDR(&dst_ip, 192, 168, 1, 64);
 
     /* Create a new connection identifier. */
     conn = netconn_new(NETCONN_TCP);
-    netconn_bind(conn, IP_ADDR_ANY, TCP_PORT);
 
+    netconn_bind(conn, IP_ADDR_ANY, TCP_PORT);
     /* Tell connection to go into listening mode. */
     netconn_listen(conn);
-    xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
     while (1)
     {
+    	xSemaphoreTake(g_semaphore_TCP, portMAX_DELAY);
         flagMenu = pdFALSE;
         counterReceive = 0;
+
     	/* Grab new connection. */
     	err = netconn_accept(conn, &newconn);
     	/* Process the new connection. */
@@ -138,7 +139,7 @@ tcp_server(void *arg)
     	    			netbuf_ref(newbuf, *(&menus[counterPrint]), sizes[counterPrint]);
     	    		    netbuf_data(newbuf, &data, &lenNew);
     	    			netconn_write(newconn, data, lenNew, NETCONN_COPY);
-    	    			vTaskDelay(1000);
+    	    			vTaskDelay(500);
     	    		}
         			netbuf_delete(newbuf);
         			flagMenu = pdTRUE;

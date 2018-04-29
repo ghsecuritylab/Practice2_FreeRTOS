@@ -3135,227 +3135,226 @@ END GROUP
  .text.buffers_Audio
                 0x0000e484      0x1bc ./lwip/contrib/apps/udpecho/udpecho.o
  .text.server_thread
-                0x0000e640       0xbc ./lwip/contrib/apps/udpecho/udpecho.o
+                0x0000e640       0xc8 ./lwip/contrib/apps/udpecho/udpecho.o
  .text.udpecho_init
-                0x0000e6fc      0x104 ./lwip/contrib/apps/udpecho/udpecho.o
-                0x0000e6fc                udpecho_init
+                0x0000e708      0x104 ./lwip/contrib/apps/udpecho/udpecho.o
+                0x0000e708                udpecho_init
  .text.tcp_server
-                0x0000e800      0x1dc ./lwip/contrib/apps/tcpecho/tcpecho.o
+                0x0000e80c      0x1dc ./lwip/contrib/apps/tcpecho/tcpecho.o
  .text.tcpecho_init
-                0x0000e9dc       0x2c ./lwip/contrib/apps/tcpecho/tcpecho.o
-                0x0000e9dc                tcpecho_init
+                0x0000e9e8       0x2c ./lwip/contrib/apps/tcpecho/tcpecho.o
+                0x0000e9e8                tcpecho_init
  .text.xEventGroupCreate
-                0x0000ea08       0x2e ./freertos/source/event_groups.o
-                0x0000ea08                xEventGroupCreate
- *fill*         0x0000ea36        0x2 ff
+                0x0000ea14       0x2e ./freertos/source/event_groups.o
+                0x0000ea14                xEventGroupCreate
+ *fill*         0x0000ea42        0x2 ff
  .text.xEventGroupWaitBits
-                0x0000ea38      0x190 ./freertos/source/event_groups.o
-                0x0000ea38                xEventGroupWaitBits
+                0x0000ea44      0x190 ./freertos/source/event_groups.o
+                0x0000ea44                xEventGroupWaitBits
  .text.xEventGroupSetBits
-                0x0000ebc8      0x112 ./freertos/source/event_groups.o
-                0x0000ebc8                xEventGroupSetBits
+                0x0000ebd4      0x112 ./freertos/source/event_groups.o
+                0x0000ebd4                xEventGroupSetBits
  .text.vEventGroupSetBitsCallback
-                0x0000ecda       0x1a ./freertos/source/event_groups.o
-                0x0000ecda                vEventGroupSetBitsCallback
+                0x0000ece6       0x1a ./freertos/source/event_groups.o
+                0x0000ece6                vEventGroupSetBitsCallback
  .text.prvTestWaitCondition
-                0x0000ecf4       0x44 ./freertos/source/event_groups.o
+                0x0000ed00       0x44 ./freertos/source/event_groups.o
  .text.xEventGroupSetBitsFromISR
-                0x0000ed38       0x28 ./freertos/source/event_groups.o
-                0x0000ed38                xEventGroupSetBitsFromISR
+                0x0000ed44       0x28 ./freertos/source/event_groups.o
+                0x0000ed44                xEventGroupSetBitsFromISR
  .text.vListInitialise
-                0x0000ed60       0x40 ./freertos/source/list.o
-                0x0000ed60                vListInitialise
+                0x0000ed6c       0x40 ./freertos/source/list.o
+                0x0000ed6c                vListInitialise
  .text.vListInitialiseItem
-                0x0000eda0       0x1a ./freertos/source/list.o
-                0x0000eda0                vListInitialiseItem
+                0x0000edac       0x1a ./freertos/source/list.o
+                0x0000edac                vListInitialiseItem
  .text.vListInsertEnd
-                0x0000edba       0x48 ./freertos/source/list.o
-                0x0000edba                vListInsertEnd
+                0x0000edc6       0x48 ./freertos/source/list.o
+                0x0000edc6                vListInsertEnd
  .text.vListInsert
-                0x0000ee02       0x72 ./freertos/source/list.o
-                0x0000ee02                vListInsert
+                0x0000ee0e       0x72 ./freertos/source/list.o
+                0x0000ee0e                vListInsert
  .text.uxListRemove
-                0x0000ee74       0x54 ./freertos/source/list.o
-                0x0000ee74                uxListRemove
+                0x0000ee80       0x54 ./freertos/source/list.o
+                0x0000ee80                uxListRemove
  .text.xQueueGenericReset
-                0x0000eec8       0xd0 ./freertos/source/queue.o
-                0x0000eec8                xQueueGenericReset
+                0x0000eed4       0xd0 ./freertos/source/queue.o
+                0x0000eed4                xQueueGenericReset
  .text.xQueueGenericCreate
-                0x0000ef98       0x72 ./freertos/source/queue.o
-                0x0000ef98                xQueueGenericCreate
+                0x0000efa4       0x72 ./freertos/source/queue.o
+                0x0000efa4                xQueueGenericCreate
  .text.prvInitialiseNewQueue
-                0x0000f00a       0x46 ./freertos/source/queue.o
+                0x0000f016       0x46 ./freertos/source/queue.o
  .text.prvInitialiseMutex
-                0x0000f050       0x34 ./freertos/source/queue.o
+                0x0000f05c       0x34 ./freertos/source/queue.o
  .text.xQueueCreateMutex
-                0x0000f084       0x30 ./freertos/source/queue.o
-                0x0000f084                xQueueCreateMutex
+                0x0000f090       0x30 ./freertos/source/queue.o
+                0x0000f090                xQueueCreateMutex
  .text.xQueueGenericSend
-                0x0000f0b4      0x1f4 ./freertos/source/queue.o
-                0x0000f0b4                xQueueGenericSend
+                0x0000f0c0      0x1f4 ./freertos/source/queue.o
+                0x0000f0c0                xQueueGenericSend
  .text.xQueueGenericSendFromISR
-                0x0000f2a8      0x128 ./freertos/source/queue.o
-                0x0000f2a8                xQueueGenericSendFromISR
+                0x0000f2b4      0x128 ./freertos/source/queue.o
+                0x0000f2b4                xQueueGenericSendFromISR
  .text.xQueueGiveFromISR
-                0x0000f3d0      0x112 ./freertos/source/queue.o
-                0x0000f3d0                xQueueGiveFromISR
- *fill*         0x0000f4e2        0x2 ff
+                0x0000f3dc      0x112 ./freertos/source/queue.o
+                0x0000f3dc                xQueueGiveFromISR
+ *fill*         0x0000f4ee        0x2 ff
  .text.xQueueGenericReceive
-                0x0000f4e4      0x224 ./freertos/source/queue.o
-                0x0000f4e4                xQueueGenericReceive
+                0x0000f4f0      0x224 ./freertos/source/queue.o
+                0x0000f4f0                xQueueGenericReceive
  .text.xQueueReceiveFromISR
-                0x0000f708       0xfa ./freertos/source/queue.o
-                0x0000f708                xQueueReceiveFromISR
+                0x0000f714       0xfa ./freertos/source/queue.o
+                0x0000f714                xQueueReceiveFromISR
  .text.uxQueueMessagesWaiting
-                0x0000f802       0x3a ./freertos/source/queue.o
-                0x0000f802                uxQueueMessagesWaiting
+                0x0000f80e       0x3a ./freertos/source/queue.o
+                0x0000f80e                uxQueueMessagesWaiting
  .text.vQueueDelete
-                0x0000f83c       0x3a ./freertos/source/queue.o
-                0x0000f83c                vQueueDelete
+                0x0000f848       0x3a ./freertos/source/queue.o
+                0x0000f848                vQueueDelete
  .text.prvCopyDataToQueue
-                0x0000f876       0xd4 ./freertos/source/queue.o
+                0x0000f882       0xd4 ./freertos/source/queue.o
  .text.prvCopyDataFromQueue
-                0x0000f94a       0x4c ./freertos/source/queue.o
+                0x0000f956       0x4c ./freertos/source/queue.o
  .text.prvUnlockQueue
-                0x0000f996       0xa4 ./freertos/source/queue.o
+                0x0000f9a2       0xa4 ./freertos/source/queue.o
  .text.prvIsQueueEmpty
-                0x0000fa3a       0x2c ./freertos/source/queue.o
+                0x0000fa46       0x2c ./freertos/source/queue.o
  .text.prvIsQueueFull
-                0x0000fa66       0x30 ./freertos/source/queue.o
+                0x0000fa72       0x30 ./freertos/source/queue.o
  .text.xQueueIsQueueFullFromISR
-                0x0000fa96       0x46 ./freertos/source/queue.o
-                0x0000fa96                xQueueIsQueueFullFromISR
+                0x0000faa2       0x46 ./freertos/source/queue.o
+                0x0000faa2                xQueueIsQueueFullFromISR
  .text.vQueueAddToRegistry
-                0x0000fadc       0x50 ./freertos/source/queue.o
-                0x0000fadc                vQueueAddToRegistry
+                0x0000fae8       0x50 ./freertos/source/queue.o
+                0x0000fae8                vQueueAddToRegistry
  .text.vQueueUnregisterQueue
-                0x0000fb2c       0x54 ./freertos/source/queue.o
-                0x0000fb2c                vQueueUnregisterQueue
+                0x0000fb38       0x54 ./freertos/source/queue.o
+                0x0000fb38                vQueueUnregisterQueue
  .text.vQueueWaitForMessageRestricted
-                0x0000fb80       0x68 ./freertos/source/queue.o
-                0x0000fb80                vQueueWaitForMessageRestricted
+                0x0000fb8c       0x68 ./freertos/source/queue.o
+                0x0000fb8c                vQueueWaitForMessageRestricted
  .text.xTaskCreate
-                0x0000fbe8       0x82 ./freertos/source/tasks.o
-                0x0000fbe8                xTaskCreate
+                0x0000fbf4       0x82 ./freertos/source/tasks.o
+                0x0000fbf4                xTaskCreate
  .text.prvInitialiseNewTask
-                0x0000fc6a      0x12a ./freertos/source/tasks.o
+                0x0000fc76      0x12a ./freertos/source/tasks.o
  .text.prvAddNewTaskToReadyList
-                0x0000fd94       0xdc ./freertos/source/tasks.o
+                0x0000fda0       0xdc ./freertos/source/tasks.o
  .text.vTaskDelay
-                0x0000fe70       0x68 ./freertos/source/tasks.o
-                0x0000fe70                vTaskDelay
+                0x0000fe7c       0x68 ./freertos/source/tasks.o
+                0x0000fe7c                vTaskDelay
  .text.vTaskStartScheduler
-                0x0000fed8       0x98 ./freertos/source/tasks.o
-                0x0000fed8                vTaskStartScheduler
+                0x0000fee4       0x98 ./freertos/source/tasks.o
+                0x0000fee4                vTaskStartScheduler
  .text.vTaskSuspendAll
-                0x0000ff70       0x1c ./freertos/source/tasks.o
-                0x0000ff70                vTaskSuspendAll
+                0x0000ff7c       0x1c ./freertos/source/tasks.o
+                0x0000ff7c                vTaskSuspendAll
  .text.xTaskResumeAll
-                0x0000ff8c      0x138 ./freertos/source/tasks.o
-                0x0000ff8c                xTaskResumeAll
+                0x0000ff98      0x138 ./freertos/source/tasks.o
+                0x0000ff98                xTaskResumeAll
  .text.xTaskGetTickCount
-                0x000100c4       0x20 ./freertos/source/tasks.o
-                0x000100c4                xTaskGetTickCount
+                0x000100d0       0x20 ./freertos/source/tasks.o
+                0x000100d0                xTaskGetTickCount
  .text.xTaskIncrementTick
-                0x000100e4      0x158 ./freertos/source/tasks.o
-                0x000100e4                xTaskIncrementTick
+                0x000100f0      0x158 ./freertos/source/tasks.o
+                0x000100f0                xTaskIncrementTick
  .text.vTaskSwitchContext
-                0x0001023c       0xb4 ./freertos/source/tasks.o
-                0x0001023c                vTaskSwitchContext
+                0x00010248       0xb4 ./freertos/source/tasks.o
+                0x00010248                vTaskSwitchContext
  .text.vTaskPlaceOnEventList
-                0x000102f0       0x48 ./freertos/source/tasks.o
-                0x000102f0                vTaskPlaceOnEventList
+                0x000102fc       0x48 ./freertos/source/tasks.o
+                0x000102fc                vTaskPlaceOnEventList
  .text.vTaskPlaceOnUnorderedEventList
-                0x00010338       0x74 ./freertos/source/tasks.o
-                0x00010338                vTaskPlaceOnUnorderedEventList
+                0x00010344       0x74 ./freertos/source/tasks.o
+                0x00010344                vTaskPlaceOnUnorderedEventList
  .text.vTaskPlaceOnEventListRestricted
-                0x000103ac       0x54 ./freertos/source/tasks.o
-                0x000103ac                vTaskPlaceOnEventListRestricted
+                0x000103b8       0x54 ./freertos/source/tasks.o
+                0x000103b8                vTaskPlaceOnEventListRestricted
  .text.xTaskRemoveFromEventList
-                0x00010400       0xc4 ./freertos/source/tasks.o
-                0x00010400                xTaskRemoveFromEventList
+                0x0001040c       0xc4 ./freertos/source/tasks.o
+                0x0001040c                xTaskRemoveFromEventList
  .text.xTaskRemoveFromUnorderedEventList
-                0x000104c4       0xcc ./freertos/source/tasks.o
-                0x000104c4                xTaskRemoveFromUnorderedEventList
+                0x000104d0       0xcc ./freertos/source/tasks.o
+                0x000104d0                xTaskRemoveFromUnorderedEventList
  .text.vTaskSetTimeOutState
-                0x00010590       0x48 ./freertos/source/tasks.o
-                0x00010590                vTaskSetTimeOutState
+                0x0001059c       0x48 ./freertos/source/tasks.o
+                0x0001059c                vTaskSetTimeOutState
  .text.xTaskCheckForTimeOut
-                0x000105d8       0xbc ./freertos/source/tasks.o
-                0x000105d8                xTaskCheckForTimeOut
+                0x000105e4       0xbc ./freertos/source/tasks.o
+                0x000105e4                xTaskCheckForTimeOut
  .text.vTaskMissedYield
-                0x00010694       0x18 ./freertos/source/tasks.o
-                0x00010694                vTaskMissedYield
+                0x000106a0       0x18 ./freertos/source/tasks.o
+                0x000106a0                vTaskMissedYield
  .text.prvIdleTask
-                0x000106ac       0x30 ./freertos/source/tasks.o
+                0x000106b8       0x30 ./freertos/source/tasks.o
  .text.prvInitialiseTaskLists
-                0x000106dc       0x80 ./freertos/source/tasks.o
+                0x000106e8       0x80 ./freertos/source/tasks.o
  .text.prvCheckTasksWaitingTermination
-                0x0001075c       0x78 ./freertos/source/tasks.o
+                0x00010768       0x78 ./freertos/source/tasks.o
  .text.prvDeleteTCB
-                0x000107d4       0x20 ./freertos/source/tasks.o
+                0x000107e0       0x20 ./freertos/source/tasks.o
  .text.prvResetNextTaskUnblockTime
-                0x000107f4       0x4c ./freertos/source/tasks.o
+                0x00010800       0x4c ./freertos/source/tasks.o
  .text.xTaskGetSchedulerState
-                0x00010840       0x3c ./freertos/source/tasks.o
-                0x00010840                xTaskGetSchedulerState
+                0x0001084c       0x3c ./freertos/source/tasks.o
+                0x0001084c                xTaskGetSchedulerState
  .text.vTaskPriorityInherit
-                0x0001087c       0xec ./freertos/source/tasks.o
-                0x0001087c                vTaskPriorityInherit
+                0x00010888       0xec ./freertos/source/tasks.o
+                0x00010888                vTaskPriorityInherit
  .text.xTaskPriorityDisinherit
-                0x00010968      0x108 ./freertos/source/tasks.o
-                0x00010968                xTaskPriorityDisinherit
+                0x00010974      0x108 ./freertos/source/tasks.o
+                0x00010974                xTaskPriorityDisinherit
  .text.uxTaskResetEventItemValue
-                0x00010a70       0x30 ./freertos/source/tasks.o
-                0x00010a70                uxTaskResetEventItemValue
+                0x00010a7c       0x30 ./freertos/source/tasks.o
+                0x00010a7c                uxTaskResetEventItemValue
  .text.pvTaskIncrementMutexHeldCount
-                0x00010aa0       0x28 ./freertos/source/tasks.o
-                0x00010aa0                pvTaskIncrementMutexHeldCount
+                0x00010aac       0x28 ./freertos/source/tasks.o
+                0x00010aac                pvTaskIncrementMutexHeldCount
  .text.prvAddCurrentTaskToDelayedList
-                0x00010ac8       0xcc ./freertos/source/tasks.o
+                0x00010ad4       0xcc ./freertos/source/tasks.o
  .text.xTimerCreateTimerTask
-                0x00010b94       0x60 ./freertos/source/timers.o
-                0x00010b94                xTimerCreateTimerTask
+                0x00010ba0       0x60 ./freertos/source/timers.o
+                0x00010ba0                xTimerCreateTimerTask
  .text.xTimerGenericCommand
-                0x00010bf4       0x98 ./freertos/source/timers.o
-                0x00010bf4                xTimerGenericCommand
+                0x00010c00       0x98 ./freertos/source/timers.o
+                0x00010c00                xTimerGenericCommand
  .text.prvProcessExpiredTimer
-                0x00010c8c       0x80 ./freertos/source/timers.o
+                0x00010c98       0x80 ./freertos/source/timers.o
  .text.prvTimerTask
-                0x00010d0c       0x24 ./freertos/source/timers.o
+                0x00010d18       0x24 ./freertos/source/timers.o
  .text.prvProcessTimerOrBlockTask
-                0x00010d30       0x9c ./freertos/source/timers.o
+                0x00010d3c       0x9c ./freertos/source/timers.o
  .text.prvGetNextExpireTime
-                0x00010dcc       0x48 ./freertos/source/timers.o
+                0x00010dd8       0x48 ./freertos/source/timers.o
  .text.prvSampleTimeNow
-                0x00010e14       0x40 ./freertos/source/timers.o
+                0x00010e20       0x40 ./freertos/source/timers.o
  .text.prvInsertTimerInActiveList
-                0x00010e54       0x84 ./freertos/source/timers.o
+                0x00010e60       0x84 ./freertos/source/timers.o
  .text.prvProcessReceivedCommands
-                0x00010ed8      0x154 ./freertos/source/timers.o
+                0x00010ee4      0x154 ./freertos/source/timers.o
  .text.prvSwitchTimerLists
-                0x0001102c       0xc0 ./freertos/source/timers.o
+                0x00011038       0xc0 ./freertos/source/timers.o
  .text.prvCheckForValidListAndQueue
-                0x000110ec       0x6c ./freertos/source/timers.o
+                0x000110f8       0x6c ./freertos/source/timers.o
  .text.xTimerPendFunctionCallFromISR
-                0x00011158       0x40 ./freertos/source/timers.o
-                0x00011158                xTimerPendFunctionCallFromISR
+                0x00011164       0x40 ./freertos/source/timers.o
+                0x00011164                xTimerPendFunctionCallFromISR
  .text.vPortSetupTimerInterrupt
-                0x00011198       0x40 ./freertos/portable/fsl_tickless_systick.o
-                0x00011198                vPortSetupTimerInterrupt
+                0x000111a4       0x40 ./freertos/portable/fsl_tickless_systick.o
+                0x000111a4                vPortSetupTimerInterrupt
  .text.pvPortMalloc
-                0x000111d8       0x22 ./freertos/portable/heap_3.o
-                0x000111d8                pvPortMalloc
+                0x000111e4       0x22 ./freertos/portable/heap_3.o
+                0x000111e4                pvPortMalloc
  .text.vPortFree
-                0x000111fa       0x24 ./freertos/portable/heap_3.o
-                0x000111fa                vPortFree
- *fill*         0x0001121e        0x2 ff
+                0x00011206       0x24 ./freertos/portable/heap_3.o
+                0x00011206                vPortFree
+ *fill*         0x0001122a        0x2 ff
  .text.pxPortInitialiseStack
-                0x00011220       0x68 ./freertos/portable/port.o
-                0x00011220                pxPortInitialiseStack
+                0x0001122c       0x68 ./freertos/portable/port.o
+                0x0001122c                pxPortInitialiseStack
  .text.prvTaskExitError
-                0x00011288       0x3c ./freertos/portable/port.o
- *fill*         0x000112c4        0xc ff
+                0x00011294       0x3c ./freertos/portable/port.o
  .text.SVC_Handler
                 0x000112d0       0x28 ./freertos/portable/port.o
                 0x000112d0                SVC_Handler
@@ -4419,7 +4418,7 @@ END GROUP
                 0x000184fc                _image_size = (_image_end - _image_start)
 OUTPUT(Wireless_Speaker.axf elf32-littlearm)
 
-.debug_info     0x00000000    0x2d9fe
+.debug_info     0x00000000    0x2da0c
  .debug_info    0x00000000      0x376 ./utilities/fsl_debug_console.o
  .debug_info    0x00000376      0x81a ./utilities/fsl_io.o
  .debug_info    0x00000b90      0x34a ./utilities/fsl_log.o
@@ -4454,27 +4453,27 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_info    0x0001998a      0xda5 ./lwip/src/api/tcpip.o
  .debug_info    0x0001a72f     0x1f47 ./lwip/port/ethernetif.o
  .debug_info    0x0001c676      0xb5d ./lwip/port/sys_arch.o
- .debug_info    0x0001d1d3     0x128f ./lwip/contrib/apps/udpecho/udpecho.o
- .debug_info    0x0001e462      0x6b1 ./lwip/contrib/apps/tcpecho/tcpecho.o
- .debug_info    0x0001eb13      0x998 ./freertos/source/event_groups.o
- .debug_info    0x0001f4ab      0x2c7 ./freertos/source/list.o
- .debug_info    0x0001f772     0x1416 ./freertos/source/queue.o
- .debug_info    0x00020b88     0x2055 ./freertos/source/tasks.o
- .debug_info    0x00022bdd      0xd46 ./freertos/source/timers.o
- .debug_info    0x00023923       0xe9 ./freertos/portable/fsl_tickless_systick.o
- .debug_info    0x00023a0c      0x118 ./freertos/portable/heap_3.o
- .debug_info    0x00023b24      0x507 ./freertos/portable/port.o
- .debug_info    0x0002402b     0x1e85 ./drivers/fsl_clock.o
- .debug_info    0x00025eb0      0x9b0 ./drivers/fsl_dac.o
- .debug_info    0x00026860     0x239e ./drivers/fsl_enet.o
- .debug_info    0x00028bfe      0x69d ./drivers/fsl_pit.o
- .debug_info    0x0002929b     0x19d1 ./drivers/fsl_uart.o
- .debug_info    0x0002ac6c      0x610 ./board/board.o
- .debug_info    0x0002b27c      0xa97 ./board/clock_config.o
- .debug_info    0x0002bd13      0xe8f ./board/fsl_phy.o
- .debug_info    0x0002cba2       0x37 ./board/peripherals.o
- .debug_info    0x0002cbd9      0x803 ./board/pin_mux.o
- .debug_info    0x0002d3dc      0x622 ./CMSIS/system_MK64F12.o
+ .debug_info    0x0001d1d3     0x129d ./lwip/contrib/apps/udpecho/udpecho.o
+ .debug_info    0x0001e470      0x6b1 ./lwip/contrib/apps/tcpecho/tcpecho.o
+ .debug_info    0x0001eb21      0x998 ./freertos/source/event_groups.o
+ .debug_info    0x0001f4b9      0x2c7 ./freertos/source/list.o
+ .debug_info    0x0001f780     0x1416 ./freertos/source/queue.o
+ .debug_info    0x00020b96     0x2055 ./freertos/source/tasks.o
+ .debug_info    0x00022beb      0xd46 ./freertos/source/timers.o
+ .debug_info    0x00023931       0xe9 ./freertos/portable/fsl_tickless_systick.o
+ .debug_info    0x00023a1a      0x118 ./freertos/portable/heap_3.o
+ .debug_info    0x00023b32      0x507 ./freertos/portable/port.o
+ .debug_info    0x00024039     0x1e85 ./drivers/fsl_clock.o
+ .debug_info    0x00025ebe      0x9b0 ./drivers/fsl_dac.o
+ .debug_info    0x0002686e     0x239e ./drivers/fsl_enet.o
+ .debug_info    0x00028c0c      0x69d ./drivers/fsl_pit.o
+ .debug_info    0x000292a9     0x19d1 ./drivers/fsl_uart.o
+ .debug_info    0x0002ac7a      0x610 ./board/board.o
+ .debug_info    0x0002b28a      0xa97 ./board/clock_config.o
+ .debug_info    0x0002bd21      0xe8f ./board/fsl_phy.o
+ .debug_info    0x0002cbb0       0x37 ./board/peripherals.o
+ .debug_info    0x0002cbe7      0x803 ./board/pin_mux.o
+ .debug_info    0x0002d3ea      0x622 ./CMSIS/system_MK64F12.o
 
 .debug_abbrev   0x00000000     0x6c0f
  .debug_abbrev  0x00000000      0x174 ./utilities/fsl_debug_console.o
@@ -4701,7 +4700,7 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_ranges  0x00001ca0       0x28 ./board/pin_mux.o
  .debug_ranges  0x00001cc8       0x18 ./CMSIS/system_MK64F12.o
 
-.debug_line     0x00000000    0x108d9
+.debug_line     0x00000000    0x108da
  .debug_line    0x00000000      0x242 ./utilities/fsl_debug_console.o
  .debug_line    0x00000242      0x241 ./utilities/fsl_io.o
  .debug_line    0x00000483      0x24d ./utilities/fsl_log.o
@@ -4736,27 +4735,27 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_line    0x00009ed0      0x520 ./lwip/src/api/tcpip.o
  .debug_line    0x0000a3f0      0x62d ./lwip/port/ethernetif.o
  .debug_line    0x0000aa1d      0x503 ./lwip/port/sys_arch.o
- .debug_line    0x0000af20      0x41d ./lwip/contrib/apps/udpecho/udpecho.o
- .debug_line    0x0000b33d      0x33e ./lwip/contrib/apps/tcpecho/tcpecho.o
- .debug_line    0x0000b67b      0x419 ./freertos/source/event_groups.o
- .debug_line    0x0000ba94      0x1d3 ./freertos/source/list.o
- .debug_line    0x0000bc67      0x949 ./freertos/source/queue.o
- .debug_line    0x0000c5b0      0xe7e ./freertos/source/tasks.o
- .debug_line    0x0000d42e      0x520 ./freertos/source/timers.o
- .debug_line    0x0000d94e      0x139 ./freertos/portable/fsl_tickless_systick.o
- .debug_line    0x0000da87       0xba ./freertos/portable/heap_3.o
- .debug_line    0x0000db41      0x33a ./freertos/portable/port.o
- .debug_line    0x0000de7b      0x942 ./drivers/fsl_clock.o
- .debug_line    0x0000e7bd      0x2da ./drivers/fsl_dac.o
- .debug_line    0x0000ea97      0x8e7 ./drivers/fsl_enet.o
- .debug_line    0x0000f37e      0x1d2 ./drivers/fsl_pit.o
- .debug_line    0x0000f550      0x957 ./drivers/fsl_uart.o
- .debug_line    0x0000fea7      0x178 ./board/board.o
- .debug_line    0x0001001f      0x226 ./board/clock_config.o
- .debug_line    0x00010245      0x305 ./board/fsl_phy.o
- .debug_line    0x0001054a       0x47 ./board/peripherals.o
- .debug_line    0x00010591      0x1d2 ./board/pin_mux.o
- .debug_line    0x00010763      0x176 ./CMSIS/system_MK64F12.o
+ .debug_line    0x0000af20      0x41e ./lwip/contrib/apps/udpecho/udpecho.o
+ .debug_line    0x0000b33e      0x33e ./lwip/contrib/apps/tcpecho/tcpecho.o
+ .debug_line    0x0000b67c      0x419 ./freertos/source/event_groups.o
+ .debug_line    0x0000ba95      0x1d3 ./freertos/source/list.o
+ .debug_line    0x0000bc68      0x949 ./freertos/source/queue.o
+ .debug_line    0x0000c5b1      0xe7e ./freertos/source/tasks.o
+ .debug_line    0x0000d42f      0x520 ./freertos/source/timers.o
+ .debug_line    0x0000d94f      0x139 ./freertos/portable/fsl_tickless_systick.o
+ .debug_line    0x0000da88       0xba ./freertos/portable/heap_3.o
+ .debug_line    0x0000db42      0x33a ./freertos/portable/port.o
+ .debug_line    0x0000de7c      0x942 ./drivers/fsl_clock.o
+ .debug_line    0x0000e7be      0x2da ./drivers/fsl_dac.o
+ .debug_line    0x0000ea98      0x8e7 ./drivers/fsl_enet.o
+ .debug_line    0x0000f37f      0x1d2 ./drivers/fsl_pit.o
+ .debug_line    0x0000f551      0x957 ./drivers/fsl_uart.o
+ .debug_line    0x0000fea8      0x178 ./board/board.o
+ .debug_line    0x00010020      0x226 ./board/clock_config.o
+ .debug_line    0x00010246      0x305 ./board/fsl_phy.o
+ .debug_line    0x0001054b       0x47 ./board/peripherals.o
+ .debug_line    0x00010592      0x1d2 ./board/pin_mux.o
+ .debug_line    0x00010764      0x176 ./CMSIS/system_MK64F12.o
 
 .debug_str      0x00000000     0xb839
  .debug_str     0x00000000      0x3a7 ./utilities/fsl_debug_console.o
@@ -4828,7 +4827,7 @@ OUTPUT(Wireless_Speaker.axf elf32-littlearm)
  .debug_str     0x00006ab0      0x2b8 ./lwip/port/sys_arch.o
                                 0xc8c (size before relaxing)
  .debug_str     0x00006d68      0x1c0 ./lwip/contrib/apps/udpecho/udpecho.o
-                               0x164f (size before relaxing)
+                               0x1656 (size before relaxing)
  .debug_str     0x00006f28       0xc3 ./lwip/contrib/apps/tcpecho/tcpecho.o
                                 0x6c3 (size before relaxing)
  .debug_str     0x00006feb      0x37c ./freertos/source/event_groups.o

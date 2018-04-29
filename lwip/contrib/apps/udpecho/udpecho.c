@@ -160,6 +160,7 @@ server_thread(void *arg)
 	struct netconn *conn;
 	struct netbuf *buf;
 
+	ip_addr_t dst_ip;
 	uint32_t *packet;
 	uint16_t len;
 	uint8_t blockSent;
@@ -167,8 +168,10 @@ server_thread(void *arg)
 	dataBuffer_t data_Queue;
 
 	LWIP_UNUSED_ARG(arg);
+	IP4_ADDR(&dst_ip, 192, 168, 1, 67);
+
 	conn = netconn_new(NETCONN_UDP);
-	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
+	netconn_bind(conn, &dst_ip, UDP_PORT);
 #if 1
 	xEventGroupWaitBits(g_events_Menu, EVENT_PLAY,
 		pdTRUE, pdTRUE, portMAX_DELAY);
@@ -221,7 +224,7 @@ void
 udpecho_init(void)
 {
 	NVIC_EnableIRQ(PIT0_IRQn);
-	NVIC_SetPriority(PIT0_IRQn,6);
+	NVIC_SetPriority(PIT0_IRQn,5);
 
 	g_semaphore_UDP = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
