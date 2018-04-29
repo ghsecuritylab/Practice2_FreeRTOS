@@ -97,7 +97,7 @@ tcp_server(void *arg)
 			SIZE_LINE_3,
 			SIZE_LINE_4
 	};
-	IP4_ADDR(&dst_ip, 192, 168, 1, 69);
+	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
 
     /* Create a new connection identifier. */
     conn = netconn_new(NETCONN_TCP);

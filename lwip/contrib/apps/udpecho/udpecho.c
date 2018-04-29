@@ -78,14 +78,14 @@ void PIT0_IRQHandler()
 	dataBuffer_t data_QueueReceived;
 	dataBuffer_t data_QueueSend;
 	BaseType_t xHigherPriorityTaskWoken;
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
-    xHigherPriorityTaskWoken = pdFALSE;
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
+    xHigherPriorityTaskWoken = pdFALSE;
     xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
 	xQueueReceiveFromISR(g_data_Buffer, &data_QueueReceived, &xHigherPriorityTaskWoken);
     data_QueueSend.data = data_QueueReceived.data;
 	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
+    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
@@ -94,9 +94,10 @@ void PIT0_IRQHandler()
 static void
 buffers_Audio(void *arg)
 {
-	const uint32_t frequencyPIT = 4800;
+	const uint32_t frequencyPIT = 1000;
 	const uint32_t f_tx_Python = 100;
-	const uint32_t sizeBuffer = ((frequencyPIT)/(f_tx_Python));
+	const uint32_t sizeBuffer = 120;
+			//((frequencyPIT)/(f_tx_Python));
 
 	uint16_t bufferA[sizeBuffer];
 	uint16_t bufferB[sizeBuffer];
@@ -112,9 +113,7 @@ buffers_Audio(void *arg)
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
-		//PIT_StopTimer(PIT, kPIT_Chnl_0);
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
-
 		if(pdFALSE)
 		{
 			xEventGroupWaitBits(g_events_Menu, EVENT_STOP,
@@ -170,19 +169,16 @@ server_thread(void *arg)
 	LWIP_UNUSED_ARG(arg);
 	conn = netconn_new(NETCONN_UDP);
 	netconn_bind(conn, IP_ADDR_ANY, UDP_PORT);
-/*
+#if 1
 	xEventGroupWaitBits(g_events_Menu, EVENT_PLAY,
 		pdTRUE, pdTRUE, portMAX_DELAY);
-*/
+#endif
 	while (1)
 	{
-		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
-
 		blockSent = pdFALSE;
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 		partBlock(&data, *packet);
-
 		data_Queue.data = data;
 
 		pitStartTimer();
@@ -192,6 +188,7 @@ server_thread(void *arg)
 			blockSent = pdTRUE;
 		}
 		netbuf_delete(buf);
+		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
 	}
 }
 
@@ -241,7 +238,7 @@ udpecho_init(void)
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 
-	xSemaphoreGive(g_semaphore_UDP);
+	xSemaphoreGive(g_semaphore_TCP);
 	vTaskStartScheduler();
 }
 

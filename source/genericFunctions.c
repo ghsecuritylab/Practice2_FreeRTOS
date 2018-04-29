@@ -21,7 +21,10 @@
 #define DACBUFFERBASE (0)
 #define DACMAXVALUE	(0xFFF)
 
-#define SECOND_TICK		(600U)
+/**
+ * 1 TICK = 1 MS
+ */
+#define SECOND_TICK		(100)
 
 
 uint8_t pitIsrFlag;
@@ -34,8 +37,6 @@ void dacInit()
 	DAC_Init(DAC0, &dacConfig);
 	DAC_Enable(DAC0, true);
 	DAC_SetBufferReadPointer(DAC0, DACBUFFERBASE);
-
-
 }
 void dacSetValue(int16_t dacValue)
 {
@@ -69,7 +70,7 @@ void pitSetPeriod(uint32_t period)
 	uint32_t time;
 	time = 1/CLOCK_GetFreq(kCLOCK_BusClk);
 	time *= period;
-    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,SECOND_TICK);
+    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,USEC_TO_COUNT((SECOND_TICK),kCLOCK_BusClk));
 
 }
 void pitStartTimer()
