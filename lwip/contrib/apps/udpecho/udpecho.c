@@ -51,6 +51,7 @@
 #define QUEUE_ELEMENTS	1
 #define N_ELEMENTS		2
 #define UDP_PORT		50500
+#define LENGTH_ARRAY_UDP	2
 
 #define EVENT_PLAY		(1<<0)
 #define EVENT_STOP		(1<<1)
@@ -69,7 +70,8 @@ QueueHandle_t g_data_Menu;
 
 typedef struct
 {
-	int16_t data;
+	int16_t data[LENGTH_ARRAY_UDP];
+	uint16_t length;
 }dataBuffer_t;
 
 /*-----------------------------------------------------------------------------------*/
@@ -77,13 +79,19 @@ void PIT0_IRQHandler()
 {
 	dataBuffer_t data_QueueReceived;
 	dataBuffer_t data_QueueSend;
+	uint16_t counter;
 	BaseType_t xHigherPriorityTaskWoken;
 
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
     xHigherPriorityTaskWoken = pdFALSE;
     xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
 	xQueueReceiveFromISR(g_data_Buffer, &data_QueueReceived, &xHigherPriorityTaskWoken);
-    data_QueueSend.data = data_QueueReceived.data;
+
+	for(counter = 0; counter < data_QueueReceived.length; counter++)
+	{
+		data_QueueSend.data[counter] = data_QueueReceived.data[counter];
+	}
+    data_QueueSend.length = data_QueueReceived.length;
 	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
     PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
@@ -96,7 +104,7 @@ buffers_Audio(void *arg)
 {
 	const uint32_t frequencyPIT = 1000;
 	const uint32_t f_tx_Python = 100;
-	const uint32_t sizeBuffer = 120;
+	const uint32_t sizeBuffer = LENGTH_ARRAY_UDP;
 			//((frequencyPIT)/(f_tx_Python));
 
 	uint16_t bufferA[sizeBuffer];
@@ -105,6 +113,7 @@ buffers_Audio(void *arg)
 	uint8_t flagStop = pdFALSE;
 	uint8_t flagPingPong = pdFALSE;
 	static uint32_t counterBlock = 0;
+	uint16_t counter;
 
 	pitInit();
 	dacInit();
@@ -121,17 +130,36 @@ buffers_Audio(void *arg)
 			flagStop = pdTRUE;
 		}
 
+		for(counter = 0; counter < sizeBuffer; counter++)
+		{
+			switch(flagPingPong)
+			{
+			case pdFALSE:
+				bufferA[counter] = data_Queue.data[counter];
+				dacSetValue(bufferB[counter]);
+				break;
+			case pdTRUE:
+				bufferB[counter] = data_Queue.data[counter];
+				dacSetValue(bufferA[counter]);
+				break;
+			default:
+				break;
+			}
+		}
+		counter++;
+		flagPingPong = !flagPingPong;
+
+#if 0
 		if((sizeBuffer > counterBlock) && (pdFALSE == flagStop))
 		{
 			switch(flagPingPong)
 			{
 			case pdFALSE:
-				bufferA[counterBlock] = (data_Queue.data);
+				bufferA[counterBlock] = data_Queue.data[counterBlock];
 				dacSetValue(bufferB[counterBlock]);
-
 				break;
 			case pdTRUE:
-				bufferB[counterBlock] = (data_Queue.data);
+				bufferB[counterBlock] = data_Queue.data[counterBlock];
 				dacSetValue(bufferA[counterBlock]);
 				break;
 			default:
@@ -144,7 +172,7 @@ buffers_Audio(void *arg)
 			counterBlock = 0;
 			flagPingPong = !flagPingPong;
 		}
-
+#endif
 		if(pdTRUE == flagStop)
 		{
 			flagStop = pdFALSE;
@@ -164,26 +192,27 @@ server_thread(void *arg)
 	uint32_t *packet;
 	uint16_t len;
 	uint8_t blockSent;
-	int16_t data = 0;
+	int16_t dummy = 0;
 	dataBuffer_t data_Queue;
+	uint32_t *directionData;
 
 	LWIP_UNUSED_ARG(arg);
-	IP4_ADDR(&dst_ip, 192, 168, 1, 67);
-
+	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
 	conn = netconn_new(NETCONN_UDP);
-	netconn_bind(conn, &dst_ip, UDP_PORT);
-#if 1
+#if 0
 	xEventGroupWaitBits(g_events_Menu, EVENT_PLAY,
 		pdTRUE, pdTRUE, portMAX_DELAY);
 #endif
 	while (1)
 	{
+		netconn_bind(conn, &dst_ip, UDP_PORT);
 		blockSent = pdFALSE;
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
-		partBlock(&data, *packet);
-		data_Queue.data = data;
 
+		directionData = (uint32_t*)&packet;
+		data_Queue.length = (len/2);
+		partBlock(data_Queue.data, directionData, len);
 		pitStartTimer();
 		if(pdFALSE == blockSent)
 		{
@@ -238,10 +267,10 @@ udpecho_init(void)
 #if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 #endif
-	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
-	xTaskCreate(buffers_Audio, "Audio", (3*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
+	xTaskCreate(server_thread, "ServerUDP", (10*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
+	xTaskCreate(buffers_Audio, "Audio", (10*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 
-	xSemaphoreGive(g_semaphore_TCP);
+	xSemaphoreGive(g_semaphore_UDP);
 	vTaskStartScheduler();
 }
 

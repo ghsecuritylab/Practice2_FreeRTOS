@@ -46,13 +46,41 @@ void dacSetValue(int16_t dacValue)
 	}
 }
 
-void partBlock(int16_t *dataAudio, uint16_t data)
+void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
 {
+	uint16_t count;
+	uint16_t countTmp = 0;
 	int16_t part;
+	uint32_t *direction;
+	uint32_t dataFinal;
+	uint32_t temp1, temp2;
+	uint32_t realLength;
 
-	part = (int16_t)data;
-	part = part / 16;
-	*dataAudio = part;
+	direction = (uint32_t*)*data;
+	dataFinal = *direction;
+	realLength = len / 2;
+
+	for(count = 0; count < realLength; count++)
+	{
+		temp1 = dataFinal;
+		temp2 = dataFinal;
+
+		temp1 &= (0xFFFF);
+		part = (int16_t)temp1;
+		part = part / 16;
+		dataAudio[countTmp] = part;
+
+		countTmp++;
+		temp2 &= (0xFFFF0000);
+		temp2 = temp2>>16;
+		part = (int16_t)temp2;
+		part = part / 16;
+		dataAudio[countTmp] = part;
+
+		countTmp++;
+		direction++;
+		dataFinal = *direction;
+	}
 }
 
 void pitInit()

@@ -147,14 +147,15 @@ tcp_server(void *arg)
     			counterReceive++;
     			if(2 == counterReceive)
     			{
-    				break;
+    				//break;
+    				xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
+    				//xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
     			}
     		}
     		/* Close connection and discard connection identifier. */
     		//netconn_close(newconn);
     		//netconn_delete(newconn);
-			xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
-			xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
+
     	}
     }
 }
