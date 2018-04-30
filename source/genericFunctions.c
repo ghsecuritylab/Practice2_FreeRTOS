@@ -22,9 +22,9 @@
 #define DACMAXVALUE	(0xFFF)
 
 /**
- * 1 TICK = 1 MS
+ * 1 TICK = 1 uS
  */
-#define SECOND_TICK		(100)
+#define SECOND_TICK		(600)
 
 
 uint8_t pitIsrFlag;
@@ -98,7 +98,8 @@ void pitSetPeriod(uint32_t period)
 	uint32_t time;
 	time = 1/CLOCK_GetFreq(kCLOCK_BusClk);
 	time *= period;
-    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,USEC_TO_COUNT((SECOND_TICK),kCLOCK_BusClk));
+    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,SECOND_TICK);
+    //PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,MSEC_TO_COUNT((SECOND_TICK),kCLOCK_BusClk));
 
 }
 void pitStartTimer()

@@ -47,11 +47,12 @@
 #include "event_groups.h"
 #include "genericFunctions.h"
 #include "fsl_pit.h"
+#include "queue.h"
 
 #define QUEUE_ELEMENTS	1
 #define N_ELEMENTS		2
 #define UDP_PORT		50500
-#define LENGTH_ARRAY_UDP	2
+#define LENGTH_ARRAY_UDP	10
 
 #define EVENT_PLAY		(1<<0)
 #define EVENT_STOP		(1<<1)
@@ -77,22 +78,25 @@ typedef struct
 /*-----------------------------------------------------------------------------------*/
 void PIT0_IRQHandler()
 {
-	dataBuffer_t data_QueueReceived;
-	dataBuffer_t data_QueueSend;
+	dataBuffer_t *data_QueueReceived;
+	dataBuffer_t *data_QueueSend;
 	uint16_t counter;
 	BaseType_t xHigherPriorityTaskWoken;
 
 	PIT_StopTimer(PIT, kPIT_Chnl_0);
     xHigherPriorityTaskWoken = pdFALSE;
     xSemaphoreGiveFromISR(g_semaphore_Buffer, &xHigherPriorityTaskWoken);
+#if 0
 	xQueueReceiveFromISR(g_data_Buffer, &data_QueueReceived, &xHigherPriorityTaskWoken);
 
-	for(counter = 0; counter < data_QueueReceived.length; counter++)
+	data_QueueSend = pvPortMalloc(sizeof(dataBuffer_t));
+	for(counter = 0; counter < LENGTH_ARRAY_UDP; counter++)
 	{
-		data_QueueSend.data[counter] = data_QueueReceived.data[counter];
+		data_QueueSend->data[counter] = data_QueueReceived->data[counter];
 	}
-    data_QueueSend.length = data_QueueReceived.length;
+    data_QueueSend->length = data_QueueReceived->length;
 	xQueueSendFromISR(g_data_Buffer, &data_QueueSend, &xHigherPriorityTaskWoken);
+#endif
     PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 
     portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
@@ -109,7 +113,7 @@ buffers_Audio(void *arg)
 
 	uint16_t bufferA[sizeBuffer];
 	uint16_t bufferB[sizeBuffer];
-	dataBuffer_t data_Queue;
+	dataBuffer_t *data_Queue;
 	uint8_t flagStop = pdFALSE;
 	uint8_t flagPingPong = pdFALSE;
 	static uint32_t counterBlock = 0;
@@ -122,24 +126,24 @@ buffers_Audio(void *arg)
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
-		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 		if(pdFALSE)
 		{
 			xEventGroupWaitBits(g_events_Menu, EVENT_STOP,
 				pdTRUE, pdTRUE, portMAX_DELAY);
 			flagStop = pdTRUE;
 		}
+		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
 		for(counter = 0; counter < sizeBuffer; counter++)
 		{
 			switch(flagPingPong)
 			{
 			case pdFALSE:
-				bufferA[counter] = data_Queue.data[counter];
+				bufferA[counter] = (int16_t)data_Queue->data[counter];
 				dacSetValue(bufferB[counter]);
 				break;
 			case pdTRUE:
-				bufferB[counter] = data_Queue.data[counter];
+				bufferB[counter] = (int16_t)data_Queue->data[counter];
 				dacSetValue(bufferA[counter]);
 				break;
 			default:
@@ -148,7 +152,7 @@ buffers_Audio(void *arg)
 		}
 		counter++;
 		flagPingPong = !flagPingPong;
-
+		vPortFree(g_data_Buffer);
 #if 0
 		if((sizeBuffer > counterBlock) && (pdFALSE == flagStop))
 		{
@@ -192,8 +196,7 @@ server_thread(void *arg)
 	uint32_t *packet;
 	uint16_t len;
 	uint8_t blockSent;
-	int16_t dummy = 0;
-	dataBuffer_t data_Queue;
+	dataBuffer_t *data_Queue;
 	uint32_t *directionData;
 
 	LWIP_UNUSED_ARG(arg);
@@ -210,9 +213,12 @@ server_thread(void *arg)
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 
+
+		data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
+
 		directionData = (uint32_t*)&packet;
-		data_Queue.length = (len/2);
-		partBlock(data_Queue.data, directionData, len);
+		data_Queue->length = (len/2);
+		partBlock(data_Queue->data, directionData, len);
 		pitStartTimer();
 		if(pdFALSE == blockSent)
 		{
