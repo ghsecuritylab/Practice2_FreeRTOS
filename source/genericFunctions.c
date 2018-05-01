@@ -22,9 +22,9 @@
 #define DACMAXVALUE	(0xFFF)
 
 /**
- * 1 TICK = 1 uS
+ * 22kHz
  */
-#define SECOND_TICK		(600)
+#define SECOND_TICK		(2727)
 
 
 uint8_t pitIsrFlag;
@@ -42,7 +42,8 @@ void dacSetValue(int16_t dacValue)
 {
 	if(dacValue < DACMAXVALUE)
 	{
-	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2024));
+		//2024
+	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2047));
 	}
 }
 
@@ -66,15 +67,15 @@ void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
 		temp2 = dataFinal;
 
 		temp1 &= (0xFFFF);
-		part = (int16_t)temp1;
-		part = part / 16;
+		part = temp1;
+		part = part>>4;
 		dataAudio[countTmp] = part;
 
 		countTmp++;
 		temp2 &= (0xFFFF0000);
 		temp2 = temp2>>16;
-		part = (int16_t)temp2;
-		part = part / 16;
+		part = temp2;
+		part = part>>4;
 		dataAudio[countTmp] = part;
 
 		countTmp++;

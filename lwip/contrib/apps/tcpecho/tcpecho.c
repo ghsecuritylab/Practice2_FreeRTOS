@@ -149,6 +149,7 @@ tcp_server(void *arg)
     			{
     				//break;
     				xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
+
     				//xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
     			}
     		}
