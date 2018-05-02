@@ -45,15 +45,18 @@
 #include "event_groups.h"
 
 #define TCP_PORT		50200
-#define MENU_ELEMENTS	4
+#define MENU_ELEMENTS	6
 #define SIZE_LINE_0		28
 #define SIZE_LINE_1		28
 #define SIZE_LINE_2		28
 #define SIZE_LINE_3		28
 #define SIZE_LINE_4		28
+#define SIZE_LINE_5		28
+#define LENGTH_ARRAY_UDP 200
 
 #define EVENT_PLAY_PORT	(1<<0)
 
+extern SemaphoreHandle_t g_semaphore_UDP;
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern QueueHandle_t g_data_Menu;
 extern EventGroupHandle_t g_events_Menu;
@@ -70,7 +73,7 @@ tcp_server(void *arg)
     uint8_t flagMenu;
     uint8_t counterReceive;
     u16_t lenNew;
-	dataBuffer_t *data_Queue;
+	uint32_t *data_Queue;
 
     struct netconn *conn, *newconn;
     err_t err;
@@ -78,9 +81,11 @@ tcp_server(void *arg)
     LWIP_UNUSED_ARG(arg);
 
 	char *menu_Line0 = "***************MENU***************";
-	char *menu_Line1 = "Play(Port)              [1]";
-	char *menu_Line2 = "Stop                    [2]";
-	char *menu_Line3 = "Connection statistics   [3]";
+	char *menu_Line1 = "Play(Port: 50500        [1]";
+	char *menu_Line2 = "Play(Port: 50600)       [2]";
+	char *menu_Line3 = "Play(Port: 50700)       [3]";
+	char *menu_Line4 = "Stop                    [4]";
+	char *menu_Line5 = "Connection statistics   [5]";
 
 	char *menus[MENU_ELEMENTS] =
 	{
@@ -88,6 +93,8 @@ tcp_server(void *arg)
 			menu_Line1,
 			menu_Line2,
 			menu_Line3,
+			menu_Line4,
+			menu_Line5
 	};
 
 	uint8_t sizes[MENU_ELEMENTS] =
@@ -96,6 +103,8 @@ tcp_server(void *arg)
 			SIZE_LINE_1,
 			SIZE_LINE_2,
 			SIZE_LINE_3,
+			SIZE_LINE_4,
+			SIZE_LINE_5
 	};
 	IP4_ADDR(&dst_ip, 192, 168, 1, 64);
 
@@ -127,11 +136,10 @@ tcp_server(void *arg)
     				netbuf_data(buf, (void**)&packet, &len);
 
     			} while (netbuf_next(buf) >= 0);
-    			data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
+    			data_Queue = pvPortMalloc(sizeof(uint32_t));
     			optionPressed = *packet;
-    			optionPressed &= 0xFFF;
-    			data_Queue->port = optionPressed;
-    			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
+    			optionPressed &= 0xF;
+    			*data_Queue = optionPressed;
 
     			netbuf_delete(buf);
     			if(pdFALSE == flagMenu)
@@ -150,7 +158,9 @@ tcp_server(void *arg)
     			counterReceive++;
     			if(2 == counterReceive)
     			{
-    				xEventGroupSetBits(g_events_Menu, EVENT_PLAY_PORT);
+        			xQueueSend(g_data_Menu, &data_Queue, portMAX_DELAY);
+    				xSemaphoreGive(g_semaphore_UDP);
+    				//xEventGroupSetBits(g_events_Menu, EVENT_PLAY_PORT);
     				//xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
     			}
     		}
@@ -221,7 +231,7 @@ tcp_client(void *arg)
 void
 tcpecho_init(void)
 {
-	xTaskCreate(tcp_server, "ServerTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
+	xTaskCreate(tcp_server, "ServerTCP", (20*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 #if 0
 	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 #endif

@@ -34,11 +34,5 @@
 
 void udpecho_init(void);
 
-typedef struct
-{
-	int16_t data[LENGTH_ARRAY_UDP];
-	uint16_t length;
-	uint32_t port;
-}dataBuffer_t;
 
 #endif /* LWIP_UDPECHO_H */

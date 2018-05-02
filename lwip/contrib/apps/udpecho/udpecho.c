@@ -54,6 +54,9 @@
 #define UDP_PORT		50500
 #define LENGTH_ARRAY_UDP 200
 #define TICKS_SECONDS	(1000)
+#define FULL_BYTE_3		(0xF00)
+#define FULL_BYTE_2		(0xF0)
+#define FULL_BYTE_1		(0xF)
 
 #define EVENT_PLAY		(1<<0)
 #define EVENT_STOP		(1<<1)
@@ -71,6 +74,12 @@ EventGroupHandle_t g_events_Menu;
 QueueHandle_t g_data_Buffer;
 QueueHandle_t g_data_Menu;
 
+typedef struct
+{
+	int16_t data[LENGTH_ARRAY_UDP];
+	uint16_t length;
+	uint32_t port;
+}dataBuffer_t;
 
 /*-----------------------------------------------------------------------------------*/
 
@@ -157,12 +166,14 @@ server_thread(void *arg)
 	ip_addr_t dst_ip;
 	uint32_t *packet;
 	uint16_t len;
-	uint8_t blockSent;
 	dataBuffer_t *data_Queue;
-	dataBuffer_t *data_Port;
+	uint32_t *data_Port;
 	uint32_t *directionData;
 	static uint32_t port_UDP;
-	uint8_t flagPORT = pdFALSE;
+	uint8_t flagPort = pdFALSE;
+	uint32_t errorCounter = 0;
+	uint32_t totalCounter = 0;
+	uint32_t currentPacketPercentage;
 
 	LWIP_UNUSED_ARG(arg);
 	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
@@ -174,17 +185,46 @@ server_thread(void *arg)
 	while (1)
 	{
 		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
+		/**************************************************/
 		if(pdFALSE == flagPort)
 		{
-			xQueueReceive(g_data_Buffer, &data_Port, portMAX_DELAY);
-			port_UDP = data_Port->port;
+			xQueueReceive(g_data_Menu, &data_Port, portMAX_DELAY);
+			port_UDP = *data_Port;
+			switch(port_UDP)
+			{
+			case 1:
+				port_UDP = 50500;
+				break;
+			case 2:
+				port_UDP = 50600;
+				break;
+			case 3:
+				port_UDP = 50700;
+				break;
+			default:
+				break;
+			}
 			flagPort = pdTRUE;
 			vPortFree(data_Port);
 		}
+
 		netconn_bind(conn, &dst_ip, port_UDP);
 		netconn_recv(conn, &buf);
-		netbuf_data(buf, (void**)&packet, &len);
-
+		//netbuf_data(buf, (void**)&packet, &len);
+		/**************************************************/
+		if(netbuf_data(buf, (void**)&packet, &len)==(-2))
+		{
+			errorCounter++;
+		}
+		if(10 == totalCounter)
+		{
+			totalCounter = 0;
+			errorCounter = 0;
+			currentPacketPercentage = (errorCounter/10)*100;
+			PRINTF("error = %d \r\n", currentPacketPercentage);
+		}
+		totalCounter++;
+		/*************************************************/
 		data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
 		directionData = (uint32_t*)&packet;
 		data_Queue->length = (len/2);
@@ -238,7 +278,7 @@ udpecho_init(void)
 
 	g_events_Menu = xEventGroupCreate();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
-	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint8_t));
+	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint32_t));
 
 #if 0
 	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
