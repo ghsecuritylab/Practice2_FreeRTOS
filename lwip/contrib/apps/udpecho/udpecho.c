@@ -79,17 +79,8 @@ typedef struct
 
 void PIT0_IRQHandler()
 {
-#if 0
-	BaseType_t xHigherPriorityTaskWoken;
-#endif
-	//PIT_StopTimer(PIT, kPIT_Chnl_0);
 	setIsrFlag(pdTRUE);
     PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
-#if 0
-    xHigherPriorityTaskWoken = pdFALSE;
-    xSemaphoreGiveFromISR(g_semaphore_PIT, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
-#endif
 }
 /*-----------------------------------------------------------------------------------*/
 static void

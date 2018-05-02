@@ -40,11 +40,13 @@ void dacInit()
 }
 void dacSetValue(int16_t dacValue)
 {
-	if(dacValue < DACMAXVALUE)
+	if(dacValue > 1500)
 	{
-		//2024
-	    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2047));
+		PRINTF("MAYOR");
 	}
+	//2024 2047
+    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2047));
+
 }
 
 void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
@@ -54,7 +56,7 @@ void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
 	int16_t part;
 	uint32_t *direction;
 	uint32_t dataFinal;
-	uint32_t temp1, temp2;
+	int32_t temp1, temp2;
 	uint32_t realLength;
 
 	direction = (uint32_t*)*data;
@@ -66,16 +68,20 @@ void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
 		temp1 = dataFinal;
 		temp2 = dataFinal;
 
+		/*******************************************/
 		temp1 &= (0xFFFF);
 		part = temp1;
-		part = part>>4;
-		dataAudio[countTmp] = part;
+		part = part/16;
 
+		dataAudio[countTmp] = part;
+		/*******************************************/
 		countTmp++;
+
 		temp2 &= (0xFFFF0000);
 		temp2 = temp2>>16;
 		part = temp2;
-		part = part>>4;
+		part = part/16;
+
 		dataAudio[countTmp] = part;
 
 		countTmp++;
