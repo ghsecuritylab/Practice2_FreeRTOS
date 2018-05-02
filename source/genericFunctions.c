@@ -20,9 +20,11 @@
 #define BIT_SHIFTING	16
 #define DACBUFFERBASE (0)
 #define DACMAXVALUE	(0xFFF)
+#define OFFSET		(2047)
 
 /**
- * 22kHz
+ * 22kHz 2727
+ * 44 kHz 1363
  */
 #define SECOND_TICK		(2727)
 
@@ -40,13 +42,7 @@ void dacInit()
 }
 void dacSetValue(int16_t dacValue)
 {
-	if(dacValue > 1500)
-	{
-		PRINTF("MAYOR");
-	}
-	//2024 2047
-    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + 2047));
-
+    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (dacValue + OFFSET));
 }
 
 void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len)
@@ -100,14 +96,9 @@ void pitInit()
 	PIT_GetEnabledInterrupts(PIT, kPIT_Chnl_0);
 }
 
-void pitSetPeriod(uint32_t period)
+void pitSetPeriod(void)
 {
-	uint32_t time;
-	time = 1/CLOCK_GetFreq(kCLOCK_BusClk);
-	time *= period;
     PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,SECOND_TICK);
-    //PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,MSEC_TO_COUNT((SECOND_TICK),kCLOCK_BusClk));
-
 }
 void pitStartTimer()
 {

@@ -10,19 +10,19 @@
 
 #include "stdint.h"
 
-void dacInit();
+void dacInit(void);
 
 void dacSetValue(int16_t value);
 
 void partBlock(int16_t *dataAudio, uint32_t *data, uint32_t len);
 
-void pitInit();
+void pitInit(void);
 
-void pitSetPeriod(uint32_t period);
+void pitSetPeriod(void);
 
-void pitStartTimer();
+void pitStartTimer(void);
 
-uint8_t getIsrFlag();
+uint8_t getIsrFlag(void);
 
 void setIsrFlag(uint8_t flag);
 

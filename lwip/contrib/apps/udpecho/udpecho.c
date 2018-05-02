@@ -71,11 +71,8 @@ EventGroupHandle_t g_events_Menu;
 QueueHandle_t g_data_Buffer;
 QueueHandle_t g_data_Menu;
 
-typedef struct
-{
-	int16_t data[LENGTH_ARRAY_UDP];
-	uint16_t length;
-}dataBuffer_t;
+
+/*-----------------------------------------------------------------------------------*/
 
 void PIT0_IRQHandler()
 {
@@ -86,7 +83,7 @@ void PIT0_IRQHandler()
 static void
 buffers_Audio(void *arg)
 {
-	const uint32_t sizeBuffer = 200;
+	const uint32_t sizeBuffer = LENGTH_ARRAY_UDP;
 	int16_t bufferA[sizeBuffer];
 	int16_t bufferB[sizeBuffer];
 	dataBuffer_t *data_Queue;
@@ -97,8 +94,7 @@ buffers_Audio(void *arg)
 
 	pitInit();
 	dacInit();
-	/**Fix the float*/
-	pitSetPeriod(1);
+	pitSetPeriod();
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
@@ -163,7 +159,10 @@ server_thread(void *arg)
 	uint16_t len;
 	uint8_t blockSent;
 	dataBuffer_t *data_Queue;
+	dataBuffer_t *data_Port;
 	uint32_t *directionData;
+	static uint32_t port_UDP;
+	uint8_t flagPORT = pdFALSE;
 
 	LWIP_UNUSED_ARG(arg);
 	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
@@ -175,7 +174,14 @@ server_thread(void *arg)
 	while (1)
 	{
 		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
-		netconn_bind(conn, &dst_ip, UDP_PORT);
+		if(pdFALSE == flagPort)
+		{
+			xQueueReceive(g_data_Buffer, &data_Port, portMAX_DELAY);
+			port_UDP = data_Port->port;
+			flagPort = pdTRUE;
+			vPortFree(data_Port);
+		}
+		netconn_bind(conn, &dst_ip, port_UDP);
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 
@@ -215,7 +221,6 @@ client_thread(void *arg)
 }
 #endif
 /*-----------------------------------------------------------------------------------*/
-/*-----------------------------------------------------------------------------------*/
 
 
 void
@@ -241,7 +246,7 @@ udpecho_init(void)
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (20*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 
-	xSemaphoreGive(g_semaphore_UDP);
+	xSemaphoreGive(g_semaphore_TCP);
 	vTaskStartScheduler();
 
 }

@@ -45,12 +45,14 @@
 #include "event_groups.h"
 
 #define TCP_PORT		50200
-#define MENU_ELEMENTS	5
+#define MENU_ELEMENTS	4
 #define SIZE_LINE_0		28
 #define SIZE_LINE_1		28
 #define SIZE_LINE_2		28
 #define SIZE_LINE_3		28
 #define SIZE_LINE_4		28
+
+#define EVENT_PLAY_PORT	(1<<0)
 
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern QueueHandle_t g_data_Menu;
@@ -68,6 +70,7 @@ tcp_server(void *arg)
     uint8_t flagMenu;
     uint8_t counterReceive;
     u16_t lenNew;
+	dataBuffer_t *data_Queue;
 
     struct netconn *conn, *newconn;
     err_t err;
@@ -75,10 +78,9 @@ tcp_server(void *arg)
     LWIP_UNUSED_ARG(arg);
 
 	char *menu_Line0 = "***************MENU***************";
-	char *menu_Line1 = "Play                    [1]";
+	char *menu_Line1 = "Play(Port)              [1]";
 	char *menu_Line2 = "Stop                    [2]";
-	char *menu_Line3 = "Select                  [3]";
-	char *menu_Line4 = "Connection statistics   [4]";
+	char *menu_Line3 = "Connection statistics   [3]";
 
 	char *menus[MENU_ELEMENTS] =
 	{
@@ -86,7 +88,6 @@ tcp_server(void *arg)
 			menu_Line1,
 			menu_Line2,
 			menu_Line3,
-			menu_Line4
 	};
 
 	uint8_t sizes[MENU_ELEMENTS] =
@@ -95,7 +96,6 @@ tcp_server(void *arg)
 			SIZE_LINE_1,
 			SIZE_LINE_2,
 			SIZE_LINE_3,
-			SIZE_LINE_4
 	};
 	IP4_ADDR(&dst_ip, 192, 168, 1, 64);
 
@@ -127,8 +127,11 @@ tcp_server(void *arg)
     				netbuf_data(buf, (void**)&packet, &len);
 
     			} while (netbuf_next(buf) >= 0);
+    			data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
     			optionPressed = *packet;
-    			optionPressed &= 0xF;
+    			optionPressed &= 0xFFF;
+    			data_Queue->port = optionPressed;
+    			xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 
     			netbuf_delete(buf);
     			if(pdFALSE == flagMenu)
@@ -147,16 +150,15 @@ tcp_server(void *arg)
     			counterReceive++;
     			if(2 == counterReceive)
     			{
-    				//break;
-    				xEventGroupSetBits(g_events_Menu, 1<<(optionPressed-1));
-
+    				xEventGroupSetBits(g_events_Menu, EVENT_PLAY_PORT);
     				//xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
     			}
     		}
     		/* Close connection and discard connection identifier. */
-    		//netconn_close(newconn);
-    		//netconn_delete(newconn);
-
+#if 0
+    		netconn_close(newconn);
+    		netconn_delete(newconn);
+#endif
     	}
     }
 }
