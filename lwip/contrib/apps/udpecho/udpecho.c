@@ -77,8 +77,6 @@ uint8_t g_flag_PIT;
 typedef struct
 {
 	int16_t data[LENGTH_ARRAY_UDP];
-	uint16_t length;
-	uint32_t port;
 }dataBuffer_t;
 /*-----------------------------------------------------------------------------------*/
 
@@ -150,13 +148,14 @@ server_thread(void *arg)
 	uint16_t len;
 	dataBuffer_t *data_Queue;
 	uint32_t *data_Port;
-	uint32_t *directionData;
 	static uint32_t port_UDP;
 	uint8_t flagPort = pdFALSE;
 
 	LWIP_UNUSED_ARG(arg);
 	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
 	conn = netconn_new(NETCONN_UDP);
+
+	TickType_t  xTimeFirst, xTimeLast;
 
 	xSemaphoreTake(g_semaphore_Menu, portMAX_DELAY);
 	if(pdFALSE == flagPort)
@@ -183,18 +182,16 @@ server_thread(void *arg)
 	netconn_bind(conn, &dst_ip, port_UDP);
 	while (1)
 	{
+		xTimeFirst = xTaskGetTickCount();
 		netconn_recv(conn, &buf);
 		netbuf_data(buf, (void**)&packet, &len);
 		data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
 		netbuf_copy(buf, data_Queue->data, len);
-#if 0
-		directionData = (uint32_t*)&packet;
-		data_Queue->length = (len/2);
-		partBlock(data_Queue->data, directionData, len);
-#endif
 		xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 		netbuf_delete(buf);
 		xSemaphoreGive(g_semaphore_Buffer);
+		xTimeLast = xTaskGetTickCount() - xTimeFirst;
+		PRINTF("TIME: %d\r\n", xTimeLast);
 		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
 	}
 }
