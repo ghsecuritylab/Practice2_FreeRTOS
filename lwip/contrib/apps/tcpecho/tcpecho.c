@@ -54,13 +54,9 @@
 #define SIZE_LINE_5		28
 #define LENGTH_ARRAY_UDP 200
 
-#define EVENT_PLAY_PORT	(1<<0)
-
-extern SemaphoreHandle_t g_semaphore_UDP;
+extern SemaphoreHandle_t g_semaphore_Menu;
 extern SemaphoreHandle_t g_semaphore_TCP;
 extern QueueHandle_t g_data_Menu;
-extern EventGroupHandle_t g_events_Menu;
-extern SemaphoreHandle_t g_semaphore_returnMenu;
 
 /*-----------------------------------------------------------------------------------*/
 static void 
@@ -159,21 +155,13 @@ tcp_server(void *arg)
     			if(2 == counterReceive)
     			{
         			xQueueSend(g_data_Menu, &data_Queue, portMAX_DELAY);
-    				xSemaphoreGive(g_semaphore_UDP);
-    				//xEventGroupSetBits(g_events_Menu, EVENT_PLAY_PORT);
-    				//xSemaphoreTake(g_semaphore_returnMenu, portMAX_DELAY);
+    				xSemaphoreGive(g_semaphore_Menu);
     			}
     		}
-    		/* Close connection and discard connection identifier. */
-#if 0
-    		netconn_close(newconn);
-    		netconn_delete(newconn);
-#endif
     	}
     }
 }
 /*-----------------------------------------------------------------------------------*/
-#if 0
 static void
 tcp_client(void *arg)
 {
@@ -223,18 +211,13 @@ tcp_client(void *arg)
 			netconn_write_partly(conn, data, len, NETCONN_COPY, NULL);
 			vTaskDelay(1000);
 		}
-		xSemaphoreGive(g_semaphore_MenuPressed);
 	}
 }
-#endif
 /*-----------------------------------------------------------------------------------*/
 void
 tcpecho_init(void)
 {
 	xTaskCreate(tcp_server, "ServerTCP", (20*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
-#if 0
-	xTaskCreate(tcp_client, "ClientTCP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-#endif
 }
 /*-----------------------------------------------------------------------------------*/
 

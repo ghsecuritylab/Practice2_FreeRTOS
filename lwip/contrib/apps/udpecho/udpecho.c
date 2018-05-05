@@ -46,33 +46,33 @@
 #include "task.h"
 #include "event_groups.h"
 #include "genericFunctions.h"
+#include "fsl_dac.h"
 #include "fsl_pit.h"
 #include "queue.h"
 
+/**
+ * 22kHz 2727
+ * 44 kHz 1363
+ */
+#define SECOND_TICK		(2727)
 #define QUEUE_ELEMENTS	1
 #define N_ELEMENTS		2
-#define UDP_PORT		50500
 #define LENGTH_ARRAY_UDP 200
 #define TICKS_SECONDS	(1000)
 #define FULL_BYTE_3		(0xF00)
 #define FULL_BYTE_2		(0xF0)
 #define FULL_BYTE_1		(0xF)
-
-#define EVENT_PLAY		(1<<0)
-#define EVENT_STOP		(1<<1)
-#define EVENT_SELECT	(1<<2)
-#define EVENT_CONN		(1<<3)
+#define DACBUFFERBASE (0)
+#define OFFSET		(2047)
 
 SemaphoreHandle_t g_semaphore_UDP;
 SemaphoreHandle_t g_semaphore_Buffer;
-SemaphoreHandle_t g_semaphore_NewPORT;
 SemaphoreHandle_t g_semaphore_TCP;
-SemaphoreHandle_t g_semaphore_returnMenu;
-SemaphoreHandle_t g_semaphore_Trans;
-EventGroupHandle_t g_events_Menu;
+SemaphoreHandle_t g_semaphore_Menu;
 
 QueueHandle_t g_data_Buffer;
 QueueHandle_t g_data_Menu;
+uint8_t g_flag_PIT;
 
 typedef struct
 {
@@ -80,13 +80,12 @@ typedef struct
 	uint16_t length;
 	uint32_t port;
 }dataBuffer_t;
-
 /*-----------------------------------------------------------------------------------*/
 
 void PIT0_IRQHandler()
 {
-	setIsrFlag(pdTRUE);
-    PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
+	g_flag_PIT = pdTRUE;
+	PIT_ClearStatusFlags(PIT, kPIT_Chnl_0, kPIT_TimerFlag);
 }
 /*-----------------------------------------------------------------------------------*/
 static void
@@ -96,30 +95,20 @@ buffers_Audio(void *arg)
 	int16_t bufferA[sizeBuffer];
 	int16_t bufferB[sizeBuffer];
 	dataBuffer_t *data_Queue;
-	uint8_t flagStop = pdFALSE;
 	uint8_t flagPingPong = pdFALSE;
 	uint16_t counter = 0;
 	uint8_t flagTimer = pdFALSE;
 
 	pitInit();
 	dacInit();
-	pitSetPeriod();
+    PIT_SetTimerPeriod(PIT, kPIT_Chnl_0,SECOND_TICK);
 	while(1)
 	{
 		xSemaphoreTake(g_semaphore_Buffer, portMAX_DELAY);
-#if 0
-		if(pdFALSE == flagStop)
-		{
-			xEventGroupWaitBits(g_events_Menu, EVENT_STOP,
-				pdTRUE, pdTRUE, portMAX_DELAY);
-			flagStop = pdTRUE;
-		}
-#endif
 		xQueueReceive(g_data_Buffer, &data_Queue, portMAX_DELAY);
-
 		if(pdFALSE == flagTimer)
 		{
-			pitStartTimer();
+		    PIT_StartTimer(PIT, kPIT_Chnl_0);
 			flagTimer = pdTRUE;
 		}
 		while(counter < sizeBuffer)
@@ -128,31 +117,24 @@ buffers_Audio(void *arg)
 			{
 			case pdFALSE:
 				bufferA[counter] = data_Queue->data[counter];
-				dacSetValue(bufferB[counter]);
+			    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (bufferB[counter] + OFFSET));
 				break;
 			case pdTRUE:
 				bufferB[counter] = data_Queue->data[counter];
-				dacSetValue(bufferA[counter]);
+			    DAC_SetBufferValue(DAC0, DACBUFFERBASE, (bufferA[counter] + OFFSET));
 				break;
 			default:
 				break;
 			}
-			if(getIsrFlag())
+			if(pdTRUE == g_flag_PIT)
 			{
 				counter++;
-				setIsrFlag(pdFALSE);
+				g_flag_PIT = pdFALSE;
 			}
 		}
 		counter = 0;
 		flagPingPong = !flagPingPong;
 		vPortFree(data_Queue);
-#if 0
-		if(pdTRUE == flagStop)
-		{
-			flagStop = pdFALSE;
-			xSemaphoreGive(g_semaphore_returnMenu);
-		}
-#endif
 		xSemaphoreGive(g_semaphore_UDP);
 	}
 }
@@ -171,68 +153,49 @@ server_thread(void *arg)
 	uint32_t *directionData;
 	static uint32_t port_UDP;
 	uint8_t flagPort = pdFALSE;
-	uint32_t errorCounter = 0;
-	uint32_t totalCounter = 0;
-	uint32_t currentPacketPercentage;
 
 	LWIP_UNUSED_ARG(arg);
 	IP4_ADDR(&dst_ip, 192, 168, 1, 66);
 	conn = netconn_new(NETCONN_UDP);
-#if 0
-	xEventGroupWaitBits(g_events_Menu, EVENT_PLAY,
-		pdTRUE, pdTRUE, portMAX_DELAY);
-#endif
+
+	xSemaphoreTake(g_semaphore_Menu, portMAX_DELAY);
+	if(pdFALSE == flagPort)
+	{
+		xQueueReceive(g_data_Menu, &data_Port, portMAX_DELAY);
+		port_UDP = *data_Port;
+		switch(port_UDP)
+		{
+		case 1:
+			port_UDP = 50500;
+			break;
+		case 2:
+			port_UDP = 50600;
+			break;
+		case 3:
+			port_UDP = 50700;
+			break;
+		default:
+			break;
+		}
+		flagPort = pdTRUE;
+		vPortFree(data_Port);
+	}
+	netconn_bind(conn, &dst_ip, port_UDP);
 	while (1)
 	{
-		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
-		/**************************************************/
-		if(pdFALSE == flagPort)
-		{
-			xQueueReceive(g_data_Menu, &data_Port, portMAX_DELAY);
-			port_UDP = *data_Port;
-			switch(port_UDP)
-			{
-			case 1:
-				port_UDP = 50500;
-				break;
-			case 2:
-				port_UDP = 50600;
-				break;
-			case 3:
-				port_UDP = 50700;
-				break;
-			default:
-				break;
-			}
-			flagPort = pdTRUE;
-			vPortFree(data_Port);
-		}
-
-		netconn_bind(conn, &dst_ip, port_UDP);
 		netconn_recv(conn, &buf);
-		//netbuf_data(buf, (void**)&packet, &len);
-		/**************************************************/
-		if(netbuf_data(buf, (void**)&packet, &len)==(-2))
-		{
-			errorCounter++;
-		}
-		if(10 == totalCounter)
-		{
-			totalCounter = 0;
-			errorCounter = 0;
-			currentPacketPercentage = (errorCounter/10)*100;
-			PRINTF("error = %d \r\n", currentPacketPercentage);
-		}
-		totalCounter++;
-		/*************************************************/
+		netbuf_data(buf, (void**)&packet, &len);
 		data_Queue = pvPortMalloc(sizeof(dataBuffer_t));
+		netbuf_copy(buf, data_Queue->data, len);
+#if 0
 		directionData = (uint32_t*)&packet;
 		data_Queue->length = (len/2);
-
 		partBlock(data_Queue->data, directionData, len);
+#endif
 		xQueueSend(g_data_Buffer, &data_Queue, portMAX_DELAY);
 		netbuf_delete(buf);
 		xSemaphoreGive(g_semaphore_Buffer);
+		xSemaphoreTake(g_semaphore_UDP, portMAX_DELAY);
 	}
 }
 
@@ -255,13 +218,12 @@ client_thread(void *arg)
 	IP4_ADDR(&dst_ip, 192, 168, 1, 65);
 	while (1)
 	{
-		netconn_sendto(conn, buf, &dst_ip, UDP_PORT);
+		netconn_sendto(conn, buf, &dst_ip, 50500);
 		vTaskDelay(1000);
 	}
 }
 #endif
 /*-----------------------------------------------------------------------------------*/
-
 
 void
 udpecho_init(void)
@@ -270,25 +232,17 @@ udpecho_init(void)
 	NVIC_SetPriority(PIT0_IRQn,5);
 
 	g_semaphore_UDP = xSemaphoreCreateBinary();
+	g_semaphore_Menu = xSemaphoreCreateBinary();
 	g_semaphore_Buffer = xSemaphoreCreateBinary();
-	g_semaphore_NewPORT = xSemaphoreCreateBinary();
 	g_semaphore_TCP = xSemaphoreCreateBinary();
-	g_semaphore_returnMenu = xSemaphoreCreateBinary();
-	g_semaphore_Trans = xSemaphoreCreateBinary();
-
-	g_events_Menu = xEventGroupCreate();
 	g_data_Buffer = xQueueCreate(QUEUE_ELEMENTS, sizeof(dataBuffer_t*));
 	g_data_Menu = xQueueCreate(QUEUE_ELEMENTS, sizeof(uint32_t));
 
-#if 0
-	xTaskCreate(client_thread, "ClientUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
-#endif
 	xTaskCreate(server_thread, "ServerUDP", (3*configMINIMAL_STACK_SIZE), NULL, 4, NULL);
 	xTaskCreate(buffers_Audio, "Audio", (20*configMINIMAL_STACK_SIZE), NULL, 5, NULL);
 
 	xSemaphoreGive(g_semaphore_TCP);
 	vTaskStartScheduler();
-
 }
 
 #endif /* LWIP_NETCONN */

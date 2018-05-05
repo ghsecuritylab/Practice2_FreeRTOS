@@ -22,13 +22,6 @@
 #define DACMAXVALUE	(0xFFF)
 #define OFFSET		(2047)
 
-/**
- * 22kHz 2727
- * 44 kHz 1363
- */
-#define SECOND_TICK		(2727)
-
-
 uint8_t pitIsrFlag;
 
 void dacInit()

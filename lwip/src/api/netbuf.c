@@ -243,4 +243,40 @@ netbuf_first(struct netbuf *buf)
   buf->ptr = buf->p;
 }
 
+/*-----------------------------------------------------------------------------------*/
+ void
+ netbuf_copy_partial(struct netbuf *buf, void *dataptr, u16_t len, u16_t offset)
+ {
+	 struct pbuf *p;
+	 u16_t i, left;
+
+	 left = 0;
+
+	 if(buf == NULL) {
+		 return;
+	 }
+
+	 /* This implementation is bad. It should use bcopy
+      instead. */
+	 for(p = buf->p; left < len && p != NULL; p = p->next) {
+		 if(offset != 0 && offset >= p->len) {
+			 offset -= p->len;
+		 } else {
+			 for(i = offset; i < p->len; ++i) {
+				 ((char *)dataptr)[left] = ((char *)p->payload)[i];
+				 if(++left >= len) {
+					 return;
+				 }
+			 }
+			 offset = 0;
+		 }
+	 }
+ }
+ /*-----------------------------------------------------------------------------------*/
+ void
+ netbuf_copy(struct netbuf *buf, void *dataptr, u16_t len)
+ {
+	 netbuf_copy_partial(buf, dataptr, len, 0);
+ }
+ /*-----------------------------------------------------------------------------------*/
 #endif /* LWIP_NETCONN */

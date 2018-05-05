@@ -48,6 +48,7 @@ lwip/contrib/apps/udpecho/udpecho.o lwip/contrib/apps/udpecho/udpecho.d: \
  C:\Projects\SE2\Wireless_Speaker\freertos\include/timers.h \
  C:\Projects\SE2\Wireless_Speaker\freertos\include/task.h \
  C:\Projects\SE2\Wireless_Speaker\source/genericFunctions.h \
+ C:\Projects\SE2\Wireless_Speaker\drivers/fsl_dac.h \
  C:\Projects\SE2\Wireless_Speaker\drivers/fsl_pit.h
 
 ../lwip/contrib/apps/udpecho/udpecho.h:
@@ -145,5 +146,7 @@ C:\Projects\SE2\Wireless_Speaker\freertos\include/timers.h:
 C:\Projects\SE2\Wireless_Speaker\freertos\include/task.h:
 
 C:\Projects\SE2\Wireless_Speaker\source/genericFunctions.h:
+
+C:\Projects\SE2\Wireless_Speaker\drivers/fsl_dac.h:
 
 C:\Projects\SE2\Wireless_Speaker\drivers/fsl_pit.h:
